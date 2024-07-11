@@ -1,0 +1,11 @@
+locations:
+  ship:
+    world: "world"
+    x: 100.0
+    y: 100.0
+    z: 100.0
+  lobby:
+    world: "world"
+    x: 100.0
+    y: 100.0
+    z: 100.0
