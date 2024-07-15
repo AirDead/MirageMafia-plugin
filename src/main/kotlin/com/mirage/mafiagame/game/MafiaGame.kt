@@ -1,38 +1,20 @@
 package com.mirage.mafiagame.game
 
 import com.mirage.mafiagame.Main
-import com.mirage.mafiagame.extensions.below
-import com.mirage.mafiagame.extensions.currentGame
-import dev.geco.gsit.api.GSitAPI
-import org.bukkit.entity.Player
-import org.bukkit.entity.Pose
+import com.mirage.utils.models.Player
 
 class MafiaGame(
-    override val plugin: Main,
-    override val gameType: GameType,
-    override val players: List<Player>
-) : Game {
-    override val killedPlayers = mutableListOf<Player>()
+    val plugin: Main,
+    val players: List<Player>
+) {
+    val killedPlayers = mutableListOf<Player>()
 
-    override fun start() {
+    fun start() {
+        // Логика начала игры
         players.forEach { player ->
-            player.currentGame = this
-            player.teleport(gameType.gameLocation)
+            // Пример: отправка сообщения игрокам
+            println(player.name)
         }
-    }
-
-    override fun stop() {
-//        val lobbyLocation = plugin.configManager.lobbyLocation
-//        players.forEach { player ->
-//            player.currentGame = null
-//            lobbyLocation?.let { player.teleport(it) }
-//        }
-    }
-
-    override fun onMafiaKill(player: Player) {
-        if (player !in killedPlayers) {
-            GSitAPI.createPose(player.location.below.block, player, Pose.SLEEPING)
-            killedPlayers.add(player)
-        }
+        // Дополнительная логика старта игры
     }
 }

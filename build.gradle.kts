@@ -10,12 +10,20 @@ version = "1.0"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("http://localhost/private")
+        credentials {
+            username = "airdead"
+            password = "9dBEWfzwOtDjCN00rTV7cyqUKbpirEOVVQCUlKgLoi8gAwZqY18OYqbefY9FQXZ/"
+        }
+        isAllowInsecureProtocol = true
+    }
 }
 
 dependencies {
-    compileOnly(fileTree("./libs"))
     paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
-    implementation("com.charleskorn.kaml:kaml:0.60.0")
+    implementation("com.mirage:utils:1.0.5")
+    implementation("io.insert-koin:koin-core:3.6.0-wasm-alpha2")
 }
 
 tasks.test {
