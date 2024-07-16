@@ -21,7 +21,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.20.4-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     implementation("com.mirage:utils:1.0.5")
     implementation("io.insert-koin:koin-core:3.6.0-wasm-alpha2")
 }
