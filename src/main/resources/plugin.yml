@@ -1,7 +1,11 @@
 name: MafiaGame
-main: com.mirage.mafiagame.Main
+main: com.mirage.mafiagame.Plugin
 version: 1.0
 api-version: 1.16
+libraries:
+  - com.mirage:utils:1.0
+  - com.mirage:packetapi:1.0
+  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0
 commands:
   testcmd:
     description: Sends a test message to the player
