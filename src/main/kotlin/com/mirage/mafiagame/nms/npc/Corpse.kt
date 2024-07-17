@@ -1,58 +1,52 @@
 package com.mirage.mafiagame.nms.npc
 
-import com.mirage.packetapi.extensions.createNameStand
-import com.mirage.packetapi.extensions.createNpc
-import com.mirage.packetapi.extensions.createTeam
 import com.mirage.packetapi.extensions.sendPackets
+import com.mojang.authlib.GameProfile
+import net.minecraft.ChatFormatting
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.Pose
-import net.minecraft.world.entity.decoration.ArmorStand
-import net.minecraft.world.scores.PlayerTeam
-import org.bukkit.Bukkit
-import org.bukkit.Location
+import net.minecraft.world.scores.Team
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
 import java.util.*
 
-class Corpse(
-    uuid: UUID,
-    name: String,
-    private val isNameVisible: Boolean = false,
-    location: Location
-) {
-    private val nameStand: ArmorStand = location.createNameStand(name)
-    private val npc: ServerPlayer = location.createNpc(uuid, name, Pose.SLEEPING)
-    private val team: PlayerTeam = npc.createTeam()
+object Corpse {
+    private val corpsesMap = HashMap<UUID, MutableList<ServerPlayer>>()
 
-    init {
-        Bukkit.getOnlinePlayers().forEach { player ->
-            player.sendPackets(
-                ClientboundSetPlayerTeamPacket.createRemovePacket(team),
-                ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true)
-            )
+    fun spawnCorpse(player: Player, name: String?, uuid: UUID, x: Double, y: Double, z: Double) {
+        val serverPlayer = (player as CraftPlayer).handle
+        val npc = ServerPlayer(serverPlayer.server, serverPlayer.serverLevel(), GameProfile(uuid, name)).apply {
+            pose = Pose.SLEEPING
+            setPos(x, y + 0.1, z)
         }
-    }
 
-    fun show(vararg players: Player) {
-        players.forEach { player ->
-            player.sendPackets(
-                ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc),
-                ClientboundAddPlayerPacket(npc),
-                ClientboundSetEntityDataPacket(npc.id, npc.entityData.packDirty())
-            )
-            if (isNameVisible) {
-                player.sendPackets(
-                    ClientboundAddEntityPacket(nameStand),
-                    ClientboundSetEntityDataPacket(nameStand.id, nameStand.entityData.packDirty())
-                )
+        val team = serverPlayer.server.scoreboard.run {
+            getPlayerTeam("invisibleNPCs") ?: addPlayerTeam("invisibleNPCs").apply {
+                setColor(ChatFormatting.BLACK)
+                setNameTagVisibility(Team.Visibility.NEVER)
+                setCollisionRule(Team.CollisionRule.NEVER)
             }
         }
+
+        serverPlayer.server.scoreboard.addPlayerToTeam(npc.scoreboardName, team)
+
+        player.sendPackets(
+            ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc),
+            ClientboundAddPlayerPacket(npc),
+            ClientboundSetEntityDataPacket(npc.id, npc.entityData.packDirty())
+        )
+
+        corpsesMap.computeIfAbsent(player.uniqueId) { mutableListOf() }.add(npc)
     }
 
-    fun hide(vararg players: Player) {
-        players.forEach { player ->
+    fun clearAllCorpses(player: Player) {
+        val serverPlayer = (player as CraftPlayer).handle
+        corpsesMap.remove(player.uniqueId)?.forEach { npc ->
+            serverPlayer.server.scoreboard.getPlayerTeam("invisibleNPCs")?.let { team ->
+                serverPlayer.server.scoreboard.removePlayerFromTeam(npc.scoreboardName, team)
+            }
             player.sendPackets(ClientboundRemoveEntitiesPacket(npc.id))
-            if (isNameVisible) player.sendPackets(ClientboundRemoveEntitiesPacket(nameStand.id))
         }
     }
 }
