@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack
 class Captain : Role {
     override val name: String = "Captain"
     override val canRepair: Boolean = true
-    override val canBreak: Boolean = false
+    override val canBreak: Boolean = true
 
     override fun getInventory(): List<ItemStack> = listOf(
         ItemStack(Material.BOOK)
