@@ -1,5 +1,6 @@
 package com.mirage.mafiagame.task.impl
 
+import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.role.Role
 import com.mirage.mafiagame.role.impl.Captain
 import com.mirage.mafiagame.task.type.InventoryTask
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 
 class TestTask : InventoryTask {
+    override val id: Int = 0
     override val inventory: Inventory = Bukkit.createInventory(null, 9, "Test Task")
     override val taskFor: List<Role> = listOf(Captain())
 
@@ -24,5 +26,6 @@ class TestTask : InventoryTask {
 
     override fun onTaskComplete(player: Player) {
         player.sendMessage("Test task completed")
+        player.currentGame?.completedTasks?.add(id)
     }
 }
