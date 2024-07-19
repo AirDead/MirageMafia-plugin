@@ -2,67 +2,119 @@ package com.mirage.mafiagame.game.impl
 
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.nms.block.BlockTypeStorage
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.block.updatedLocations
-import com.mirage.mafiagame.nms.npc.Corpse
 import com.mirage.mafiagame.role.currentRole
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.block.Blocks
-import org.bukkit.GameMode
-import org.bukkit.Material
-import org.bukkit.Sound
+import org.bukkit.*
 import org.bukkit.block.Block
 import org.bukkit.entity.Player
+import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class MafiaGame(
     override val plugin: JavaPlugin,
-    override val players: List<Player>
+    override val players: List<Player>,
+    override val chestInventories: Map<Location, Inventory>,
 ) : Game {
+    // Карта для хранения местоположения и типа блока
+    override val blockMap = ConcurrentHashMap<Location, Material>()
     override var brokenBlock: Int = 0
     override val completedTasks = mutableListOf<Int>()
     override var sabotageRunnable: BukkitTask? = null
     override var lastSabotageEndTime: Long = 0
 
     override fun start() {
-        println("Game started")
+        val onlinePlayers = Bukkit.getOnlinePlayers()
+
+        onlinePlayers.forEach { player ->
+            if (player in players) {
+                player.teleport(Location(player.world, 0.0, 100.0, 0.0)) // TODO: Установите местоположение карты
+
+                onlinePlayers.forEach { other ->
+                    if (other !in players) {
+                        player.hidePlayer(plugin, other)
+                    }
+                }
+            } else {
+                players.forEach { visiblePlayer ->
+                    visiblePlayer.hidePlayer(plugin, player)
+                }
+            }
+        }
     }
 
     override fun end() {
-        println("Game ended")
+        val onlinePlayers = Bukkit.getOnlinePlayers()
+
+        onlinePlayers.forEach { player ->
+            players.forEach { visiblePlayer ->
+                player.showPlayer(plugin, visiblePlayer)
+            }
+        }
+
+        players.forEach { player ->
+            player.teleport(Location(player.world, 0.0, 100.0, 0.0)) // TODO: Установите местоположение карты
+            player.currentRole = null
+            player.currentGame = null
+            onlinePlayers.forEach { visiblePlayer ->
+                player.showPlayer(plugin, visiblePlayer)
+            }
+        }
     }
 
     override fun onMafiaKill(player: Player) {
-        val location = player.location
-        
-        val tabPacketInfo = ClientboundPlayerInfoUpdatePacket.Entry(
-            player.uniqueId,
-            player.craftPlayer.profile,
-            true,
-            0,
-            GameType.SURVIVAL,
-            Component.literal(player.name),
-            null
-        )
-        val tabPacket = ClientboundPlayerInfoUpdatePacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE, ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME), tabPacketInfo)
+        val createTabPacketInfo = { color: Int ->
+            ClientboundPlayerInfoUpdatePacket.Entry(
+                player.uniqueId,
+                player.craftPlayer.profile,
+                true,
+                0,
+                GameType.SURVIVAL,
+                Component.literal(player.name).withStyle { style ->
+                    style.withColor(TextColor.fromRgb(color))
+                },
+                null
+            )
+        }
 
-        player.gameMode = GameMode.SURVIVAL
+        val tabPacketRed = ClientboundPlayerInfoUpdatePacket(
+            EnumSet.of(
+                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
+                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+            ), listOf(createTabPacketInfo(0xFF0000))
+        )
+
+        val tabPacketWhite = ClientboundPlayerInfoUpdatePacket(
+            EnumSet.of(
+                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
+                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
+            ), listOf(createTabPacketInfo(0xFFFFFF))
+        )
+
+        player.gameMode = GameMode.SPECTATOR
 
         players.forEach {
-            Corpse.spawnCorpse(it, player.name, player.uniqueId, location.x, location.y, location.z)
-            it.sendPackets(tabPacket)
+            if (it == player) {
+                it.sendPackets(tabPacketRed)
+            } else {
+                it.sendPackets(tabPacketWhite)
+            }
+            // TODO: Добавить спавн трупа
         }
     }
 
@@ -82,7 +134,7 @@ class MafiaGame(
         }
 
         players.forEach { it.sendPackets(ClientboundBlockUpdatePacket(location.toBlockPos(), newState)) }
-        BlockTypeStorage.updateBlockType(location, newType)
+        blockMap[location] = newType
         val vector = location.toVector3i()
 
         when (newType) {
@@ -119,9 +171,7 @@ class MafiaGame(
             } else {
                 player.playSound(player.location, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f)
                 player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 20 * 2, 1))
-                player.currentRole = null
-                player.currentGame = null
-                player.teleport(player.world.spawnLocation)
+                end()
             }
         }
         lastSabotageEndTime = System.currentTimeMillis()

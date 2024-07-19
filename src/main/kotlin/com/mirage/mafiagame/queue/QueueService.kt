@@ -14,7 +14,7 @@ class QueueService(
         QueueType.FIRST to QueueManager { Queue(10) {
             MafiaGame(plugin, it.toBukkitPlayers()).start()
         } },
-        QueueType.SECOND to QueueManager { Queue(5) {
+        QueueType.SECOND to QueueManager { Queue(15) {
             MafiaGame(plugin, it.toBukkitPlayers()).start()
         } },
         QueueType.THIRD to QueueManager { Queue(5) {

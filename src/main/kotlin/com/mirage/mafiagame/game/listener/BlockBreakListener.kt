@@ -1,25 +1,29 @@
 package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.nms.block.BlockTypeStorage
+import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class BlockBreakListener(
-    val plugin: JavaPlugin
-): Listener {
+class BlockBreakListener(private val plugin: JavaPlugin) : Listener {
+
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
-        val block = BlockTypeStorage.getBlock(event.block.location) ?: BlockTypeStorage.setBlock(event.block.location, event.block)
-        with(event) {
-            isCancelled = true
-            player.currentGame?.let { game ->
-                plugin.server.scheduler.runTaskLater(plugin, Runnable {
-                    game.onBlockBreak(player, block)
-                }, 3)
-            }
-        }
+        event.isCancelled = true
+        if (event.player.inventory.itemInMainHand.type != Material.IRON_PICKAXE) return
+
+        val player = event.player
+        val game = player.currentGame ?: return
+        val location = event.block.location
+
+        val block = game.blockMap[location]?.let {
+            event.block.apply { type = it }
+        } ?: event.block
+
+        plugin.server.scheduler.runTaskLater(plugin, Runnable {
+            game.onBlockBreak(player, block)
+        }, 3)
     }
 }

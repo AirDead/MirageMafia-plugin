@@ -7,8 +7,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBl
 import com.mirage.mafiagame.nms.block.updatedLocations
 
 object BlockUpdateListener : PacketListener {
-    override fun onPacketSend(event: PacketSendEvent?) {
-        if (event?.packetType == PacketType.Play.Server.BLOCK_CHANGE) {
+    override fun onPacketSend(event: PacketSendEvent) {
+        if (event.packetType == PacketType.Play.Server.BLOCK_CHANGE) {
             val packet = WrapperPlayServerBlockChange(event)
             if (updatedLocations.contains(packet.blockPosition)) {
                 event.isCancelled = true
