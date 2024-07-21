@@ -2,6 +2,7 @@ package com.mirage.mafiagame
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketListenerPriority
+import com.mirage.mafiagame.command.TestCmd
 import com.mirage.mafiagame.game.listener.BlockBreakListener
 import com.mirage.mafiagame.game.listener.BlockInteractionListener
 import com.mirage.mafiagame.game.listener.DropItemListener
@@ -29,6 +30,8 @@ class Plugin : JavaPlugin() {
 
         PacketEvents.getAPI().eventManager.registerListener(BlockUpdateListener, PacketListenerPriority.HIGH)
         PacketEvents.getAPI().init()
+
+        getCommand("test")?.setExecutor(TestCmd(this))
     }
 
     override fun onDisable() {

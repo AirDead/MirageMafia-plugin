@@ -6,10 +6,10 @@ import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.block.updatedLocations
 import com.mirage.mafiagame.role.currentRole
+import com.mirage.mafiagame.role.impl.Captain
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
 import net.minecraft.network.chat.Component
-import net.minecraft.network.chat.TextColor
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.world.level.GameType
@@ -31,7 +31,6 @@ class MafiaGame(
     override val players: List<Player>,
     override val chestInventories: Map<Location, Inventory>,
 ) : Game {
-    // Карта для хранения местоположения и типа блока
     override val blockMap = ConcurrentHashMap<Location, Material>()
     override var brokenBlock: Int = 0
     override val completedTasks = mutableListOf<Int>()
@@ -43,7 +42,11 @@ class MafiaGame(
 
         onlinePlayers.forEach { player ->
             if (player in players) {
-                player.teleport(Location(player.world, 0.0, 100.0, 0.0)) // TODO: Установите местоположение карты
+                player.teleport(Location(player.world, 196.0, 94.0, 1134.0)) // TODO: Установите местоположение карты
+                player.currentRole = Captain()
+                player.currentGame = this
+
+                player.sendMessage(player.currentGame.toString() ?: "null")
 
                 onlinePlayers.forEach { other ->
                     if (other !in players) {
@@ -68,9 +71,10 @@ class MafiaGame(
         }
 
         players.forEach { player ->
-            player.teleport(Location(player.world, 0.0, 100.0, 0.0)) // TODO: Установите местоположение карты
+            player.teleport(player.world.spawnLocation)
             player.currentRole = null
             player.currentGame = null
+            player.teleport(Location(Bukkit.getWorld("world"), 45.0, 28.0, 123.0))
             onlinePlayers.forEach { visiblePlayer ->
                 player.showPlayer(plugin, visiblePlayer)
             }
@@ -78,77 +82,50 @@ class MafiaGame(
     }
 
     override fun onMafiaKill(player: Player) {
-        val createTabPacketInfo = { color: Int ->
-            ClientboundPlayerInfoUpdatePacket.Entry(
-                player.uniqueId,
-                player.craftPlayer.profile,
-                true,
-                0,
-                GameType.SURVIVAL,
-                Component.literal(player.name).withStyle { style ->
-                    style.withColor(TextColor.fromRgb(color))
-                },
-                null
-            )
-        }
-
-        val tabPacketRed = ClientboundPlayerInfoUpdatePacket(
-            EnumSet.of(
-                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
-                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
-            ), listOf(createTabPacketInfo(0xFF0000))
-        )
-
-        val tabPacketWhite = ClientboundPlayerInfoUpdatePacket(
-            EnumSet.of(
-                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE,
-                ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME
-            ), listOf(createTabPacketInfo(0xFFFFFF))
+        val createTabPacketInfo = ClientboundPlayerInfoUpdatePacket.Entry(
+            player.uniqueId,
+            player.craftPlayer.profile,
+            true,
+            0,
+            GameType.SURVIVAL,
+            Component.literal(player.name),
+            null
         )
 
         player.gameMode = GameMode.SPECTATOR
 
         players.forEach {
-            if (it == player) {
-                it.sendPackets(tabPacketRed)
-            } else {
-                it.sendPackets(tabPacketWhite)
-            }
+            it.sendPackets(ClientboundPlayerInfoUpdatePacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE), createTabPacketInfo))
             // TODO: Добавить спавн трупа
         }
     }
 
     override fun onBlockBreak(player: Player, block: Block) {
         val location = block.location
-        val currentRole = player.currentRole
-        val currentTime = System.currentTimeMillis()
-
-        val (newType, newState) = when {
-            currentRole?.canRepair == true && block.type == Material.RED_CONCRETE && sabotageRunnable != null -> Material.YELLOW_CONCRETE to Blocks.YELLOW_CONCRETE.defaultBlockState()
-            currentRole?.canBreak == true && block.type == Material.YELLOW_CONCRETE && sabotageRunnable == null && currentTime - lastSabotageEndTime > 180_000 -> Material.RED_CONCRETE to Blocks.RED_CONCRETE.defaultBlockState()
-            currentRole?.canBreak == true && block.type == Material.YELLOW_CONCRETE && sabotageRunnable == null && currentTime - lastSabotageEndTime <= 180_000 -> {
-                player.sendMessage("Саботаж на кулдауне. Подождите ${(180_000 - (currentTime - lastSabotageEndTime)) / 1000} секунд.")
-                return
-            }
-            else -> return
-        }
-
-        players.forEach { it.sendPackets(ClientboundBlockUpdatePacket(location.toBlockPos(), newState)) }
-        blockMap[location] = newType
-        val vector = location.toVector3i()
-
-        when (newType) {
-            Material.RED_CONCRETE -> {
-                updatedLocations.add(vector)
-                if (++brokenBlock >= 5 && sabotageRunnable == null) {
-                    onSabotageStart()
-                }
-            }
+        when (block.type) {
             Material.YELLOW_CONCRETE -> {
-                updatedLocations.remove(vector)
-                if (--brokenBlock == 0 && sabotageRunnable != null) {
-                    onSabotageEnd(true)
+                players.forEach {
+                    it.sendPackets(
+                        ClientboundBlockUpdatePacket(
+                            location.toBlockPos(),
+                            Blocks.RED_CONCRETE.defaultBlockState()
+                        )
+                    )
                 }
+                blockMap[location] = Material.RED_CONCRETE
+                updatedLocations.add(location.toVector3i())
+            }
+            Material.RED_CONCRETE -> {
+                updatedLocations.remove(location.toVector3i())
+                players.forEach {
+                    it.sendPackets(
+                        ClientboundBlockUpdatePacket(
+                            location.toBlockPos(),
+                            Blocks.YELLOW_CONCRETE.defaultBlockState()
+                        )
+                    )
+                }
+                blockMap[location] = Material.YELLOW_CONCRETE
             }
             else -> {}
         }
