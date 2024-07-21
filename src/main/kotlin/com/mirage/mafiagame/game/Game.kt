@@ -1,5 +1,6 @@
 package com.mirage.mafiagame.game
 
+import com.github.retrooper.packetevents.util.Vector3i
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -18,11 +19,12 @@ interface Game {
     val completedTasks: MutableList<Int>
     var sabotageRunnable: BukkitTask?
     var lastSabotageEndTime: Long
+    val updatedLocations: MutableSet<Vector3i>
 
     fun start()
     fun end()
     fun onMafiaKill(player: Player)
-    fun onBlockBreak(player: Player, block: Block)
+    fun onBlockBreak(player: Player, block: Material, location: Location)
     fun onSabotageStart()
     fun onSabotageEnd(isRepaired: Boolean)
 }

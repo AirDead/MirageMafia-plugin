@@ -6,7 +6,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class BlockBreakListener(private val plugin: JavaPlugin) : Listener {
+class BlockBreakListener(val plugin: JavaPlugin) : Listener {
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
         event.isCancelled = true
@@ -15,14 +15,10 @@ class BlockBreakListener(private val plugin: JavaPlugin) : Listener {
         val game = player.currentGame ?: return
         val location = event.block.location
 
-        val block = game.blockMap[location]?.let {
-            event.block.apply { type = it }
-        } ?: event.block
-
-        player.sendMessage("$block")
+        val block = game.blockMap[location] ?: event.block.type
 
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            game.onBlockBreak(player, block)
+            game.onBlockBreak(player, block, location)
         }, 4)
     }
 }

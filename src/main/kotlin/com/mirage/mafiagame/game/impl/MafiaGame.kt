@@ -1,10 +1,10 @@
 package com.mirage.mafiagame.game.impl
 
+import com.github.retrooper.packetevents.util.Vector3i
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
-import com.mirage.mafiagame.nms.block.updatedLocations
 import com.mirage.mafiagame.role.currentRole
 import com.mirage.mafiagame.role.impl.Captain
 import com.mirage.packetapi.extensions.craftPlayer
@@ -15,7 +15,6 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.block.Blocks
 import org.bukkit.*
-import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.java.JavaPlugin
@@ -32,6 +31,7 @@ class MafiaGame(
     override val chestInventories: Map<Location, Inventory>,
 ) : Game {
     override val blockMap = ConcurrentHashMap<Location, Material>()
+    override val updatedLocations = mutableSetOf<Vector3i>()
     override var brokenBlock: Int = 0
     override val completedTasks = mutableListOf<Int>()
     override var sabotageRunnable: BukkitTask? = null
@@ -42,11 +42,9 @@ class MafiaGame(
 
         onlinePlayers.forEach { player ->
             if (player in players) {
-                player.teleport(Location(player.world, 196.0, 94.0, 1134.0)) // TODO: Установите местоположение карты
+                player.teleport(Location(player.world, 196.0, 94.0, 1134.0)) // TODO: Set the map location
                 player.currentRole = Captain()
                 player.currentGame = this
-
-                player.sendMessage(player.currentGame.toString() ?: "null")
 
                 onlinePlayers.forEach { other ->
                     if (other !in players) {
@@ -95,14 +93,18 @@ class MafiaGame(
         player.gameMode = GameMode.SPECTATOR
 
         players.forEach {
-            it.sendPackets(ClientboundPlayerInfoUpdatePacket(EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE), createTabPacketInfo))
-            // TODO: Добавить спавн трупа
+            it.sendPackets(
+                ClientboundPlayerInfoUpdatePacket(
+                    EnumSet.of(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_GAME_MODE),
+                    createTabPacketInfo
+                )
+            )
+            // TODO: Add corpse spawn logic
         }
     }
 
-    override fun onBlockBreak(player: Player, block: Block) {
-        val location = block.location
-        when (block.type) {
+    override fun onBlockBreak(player: Player, block: Material, location: Location) {
+        when (block) {
             Material.YELLOW_CONCRETE -> {
                 players.forEach {
                     it.sendPackets(
@@ -115,8 +117,12 @@ class MafiaGame(
                 blockMap[location] = Material.RED_CONCRETE
                 updatedLocations.add(location.toVector3i())
             }
+
             Material.RED_CONCRETE -> {
                 updatedLocations.remove(location.toVector3i())
+                updatedLocations.forEach {
+                    println(it)
+                }
                 players.forEach {
                     it.sendPackets(
                         ClientboundBlockUpdatePacket(
@@ -127,6 +133,7 @@ class MafiaGame(
                 }
                 blockMap[location] = Material.YELLOW_CONCRETE
             }
+
             else -> {}
         }
     }
