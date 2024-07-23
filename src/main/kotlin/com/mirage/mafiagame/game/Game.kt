@@ -26,4 +26,5 @@ interface Game {
     fun onBlockBreak(player: Player, block: Material, location: Location)
     fun onSabotageStart()
     fun onSabotageEnd(isRepaired: Boolean)
+
 }

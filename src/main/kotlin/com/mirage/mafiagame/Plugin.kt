@@ -11,9 +11,12 @@ import com.mirage.mafiagame.network.listener.QueueJoinMessage
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
 import com.mirage.mafiagame.queue.QueueService
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
+import org.bukkit.Location
 import org.bukkit.plugin.java.JavaPlugin
 
 class Plugin : JavaPlugin() {
+    private val locations = mutableListOf<Location>()
+
     override fun onLoad() {
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))
         PacketEvents.getAPI().settings.reEncodeByDefault(false).checkForUpdates(true)
@@ -22,6 +25,8 @@ class Plugin : JavaPlugin() {
 
     override fun onEnable() {
         val queueService = QueueService(this)
+
+        saveDefaultConfig()
 
         server.pluginManager.registerEvents(BlockBreakListener(this), this)
         server.pluginManager.registerEvents(BlockInteractionListener, this)
@@ -40,5 +45,4 @@ class Plugin : JavaPlugin() {
     override fun onDisable() {
         PacketEvents.getAPI().terminate()
     }
-
 }

@@ -1,11 +1,71 @@
 locations:
-  ship:
-    world: "world"
-    x: 100.0
-    y: 100.0
-    z: 100.0
-  lobby:
-    world: "world"
-    x: 100.0
-    y: 100.0
-    z: 100.0
+  '0':
+    world: world
+    x: 189.0
+    y: 84.0
+    z: 1127.0
+  '1':
+    world: world
+    x: 233.0
+    y: 83.0
+    z: 1133.0
+  '2':
+    world: world
+    x: 232.0
+    y: 89.0
+    z: 1142.0
+  '3':
+    world: world
+    x: 233.0
+    y: 89.0
+    z: 1139.0
+  '4':
+    world: world
+    x: 236.0
+    y: 89.0
+    z: 1130.0
+  '5':
+    world: world
+    x: 186.0
+    y: 89.0
+    z: 1136.0
+  '6':
+    world: world
+    x: 183.0
+    y: 89.0
+    z: 1134.0
+  '7':
+    world: world
+    x: 227.0
+    y: 89.0
+    z: 1130.0
+  '8':
+    world: world
+    x: 170.0
+    y: 94.0
+    z: 1128.0
+  '9':
+    world: world
+    x: 186.0
+    y: 88.0
+    z: 1130.0
+  '10':
+    world: world
+    x: 222.0
+    y: 88.0
+    z: 1118.0
+  '11':
+    world: world
+    x: 213.0
+    y: 89.0
+    z: 1119.0
+  '12':
+    world: world
+    x: 191.0
+    y: 95.0
+    z: 1126.0
+  '13':
+    world: world
+    x: 191.0
+    y: 95.0
+    z: 1126.0

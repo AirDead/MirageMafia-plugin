@@ -2,14 +2,13 @@ package com.mirage.mafiagame.game.impl
 
 import com.github.retrooper.packetevents.util.Vector3i
 import com.mirage.mafiagame.game.Game
-import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.isNotNull
 import com.mirage.mafiagame.game.isNull
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.npc.Corpse
+import com.mirage.mafiagame.role.RoleAssigner
 import com.mirage.mafiagame.role.currentRole
-import com.mirage.mafiagame.role.impl.Captain
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
 import net.minecraft.network.chat.Component
@@ -43,32 +42,33 @@ class MafiaGame(
 
     override fun start() {
         val onlinePlayers = Bukkit.getOnlinePlayers()
+        RoleAssigner.assignRoles(players)
+
         onlinePlayers.forEach { player ->
-            if (player in players) {
-                player.apply {
-                    teleport(Location(world, 196.0, 94.0, 1134.0)) // TODO: Set the map location
-                    currentRole = Captain()
-                    currentGame = this@MafiaGame
-                    onlinePlayers.forEach { other -> if (other !in players) hidePlayer(plugin, other) }
-                }
-            } else {
-                players.forEach { visiblePlayer -> visiblePlayer.hidePlayer(plugin, player) }
+            players.forEach { hiddenPlayer ->
+                player.hidePlayer(plugin, hiddenPlayer)
+            }
+        }
+
+        players.forEach { player ->
+            onlinePlayers.forEach { hiddenPlayer ->
+                player.hidePlayer(plugin, hiddenPlayer)
             }
         }
     }
 
     override fun end() {
         val onlinePlayers = Bukkit.getOnlinePlayers()
+
         onlinePlayers.forEach { player ->
-            players.forEach { visiblePlayer -> player.showPlayer(plugin, visiblePlayer) }
+            players.forEach { visiblePlayer ->
+                player.showPlayer(plugin, visiblePlayer)
+            }
         }
+
         players.forEach { player ->
-            player.apply {
-                teleport(world.spawnLocation)
-                currentRole = null
-                currentGame = null
-                Corpse.clearAllCorpses(this)
-                teleport(Location(Bukkit.getWorld("world"), 45.0, 28.0, 123.0))
+            onlinePlayers.forEach {
+                player.showPlayer(plugin, it)
             }
         }
     }

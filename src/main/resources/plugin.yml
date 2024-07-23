@@ -2,13 +2,14 @@ name: MafiaGame
 main: com.mirage.mafiagame.Plugin
 version: 1.0
 api-version: 1.16
+commands:
+  test:
+    usage: /<command>
+    description: Command for mafia management
+
 libraries:
   - com.mirage:utils:1.0
   - com.mirage:packetapi:1.0
   - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0
 depend:
   - packetevents
-commands:
-  test:
-    description: Sends a test message to the player
-    usage: /test
