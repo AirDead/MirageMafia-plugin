@@ -12,7 +12,7 @@ object BlockInteractionListener : Listener {
     @EventHandler
     fun onBlockInteract(event: PlayerInteractEvent) {
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
-        if (event.clickedBlock?.type != Material.CHEST) return
+        if (event.clickedBlock?.type != Material.CHEST || event.clickedBlock?.type != Material.BARREL) return
         event.isCancelled = true
 
         val player = event.player
