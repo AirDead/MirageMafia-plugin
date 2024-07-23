@@ -12,5 +12,4 @@ object DropItemListener : Listener {
             event.isCancelled = true
         }
     }
-
 }

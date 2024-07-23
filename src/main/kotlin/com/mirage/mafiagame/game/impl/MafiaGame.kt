@@ -99,31 +99,32 @@ class MafiaGame(
     }
 
     override fun onBlockBreak(player: Player, block: Material, location: Location) {
-        player.currentRole?.let { role ->
-            when (block) {
-                Material.YELLOW_CONCRETE -> {
-                    if (sabotageRunnable.isNotNull() || System.currentTimeMillis() - lastSabotageEndTime < 5 * 60 * 1000 || !role.canBreak) return
-                    updateBlock(location, Blocks.RED_CONCRETE.defaultBlockState())
-                    if (++brokenBlock == 5) onSabotageStart()
+        when (block) {
+            Material.YELLOW_CONCRETE -> {
+                if (player.currentRole?.canBreak == false) return
+                if (sabotageRunnable.isNotNull() || System.currentTimeMillis() - lastSabotageEndTime < 5 * 60 * 1000) return
+                val packet = ClientboundBlockUpdatePacket(location.toBlockPos(), Blocks.RED_CONCRETE.defaultBlockState())
+                players.forEach { it.sendPackets(packet) } // Packet yellow -> red
+                updatedLocations.add(location.toVector3i()) // Add for block update listener
+                blockMap[location] = Material.RED_CONCRETE
+                if (++brokenBlock == 5) {
+                    onSabotageStart()
                 }
-                Material.RED_CONCRETE -> {
-                    if (sabotageRunnable.isNull() || !role.canRepair) return
-                    updateBlock(location, Blocks.YELLOW_CONCRETE.defaultBlockState())
-                    if (--brokenBlock == 0) {
-                        onSabotageEnd(true)
-                        sabotageRunnable?.cancel()
-                    }
-                }
-                else -> {}
             }
+            Material.RED_CONCRETE -> {
+                if (player.currentRole?.canRepair == false) return
+                if (sabotageRunnable.isNull()) return
+                updatedLocations.remove(location.toVector3i()) // Remove for block update listener
+                val packet = ClientboundBlockUpdatePacket(location.toBlockPos(), Blocks.YELLOW_CONCRETE.defaultBlockState())
+                players.forEach { it.sendPackets(packet) } // Packet red -> yellow
+                blockMap[location] = Material.YELLOW_CONCRETE
+                if (--brokenBlock == 0) {
+                    onSabotageEnd(true)
+                    sabotageRunnable?.cancel()
+                }
+            }
+            else -> {}
         }
-    }
-
-    private fun updateBlock(location: Location, blockState: net.minecraft.world.level.block.state.BlockState) {
-        val packet = ClientboundBlockUpdatePacket(location.toBlockPos(), blockState)
-        players.forEach { it.sendPackets(packet) }
-        blockMap[location] = if (blockState.block == Blocks.RED_CONCRETE) Material.RED_CONCRETE else Material.YELLOW_CONCRETE
-        if (blockState.block == Blocks.RED_CONCRETE) updatedLocations.add(location.toVector3i()) else updatedLocations.remove(location.toVector3i())
     }
 
     override fun onSabotageStart() {
@@ -150,5 +151,6 @@ class MafiaGame(
         }
         lastSabotageEndTime = System.currentTimeMillis()
         brokenBlock = 0
+        blockMap.clear() // Clear the blockMap to reset the state
     }
 }
