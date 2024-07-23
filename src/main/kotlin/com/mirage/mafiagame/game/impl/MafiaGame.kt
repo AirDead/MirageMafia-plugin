@@ -2,6 +2,7 @@ package com.mirage.mafiagame.game.impl
 
 import com.github.retrooper.packetevents.util.Vector3i
 import com.mirage.mafiagame.game.Game
+import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.isNotNull
 import com.mirage.mafiagame.game.isNull
 import com.mirage.mafiagame.nms.block.toBlockPos
@@ -45,30 +46,42 @@ class MafiaGame(
         RoleAssigner.assignRoles(players)
 
         onlinePlayers.forEach { player ->
-            players.forEach { hiddenPlayer ->
-                player.hidePlayer(plugin, hiddenPlayer)
+            if (player.currentGame == null || player.currentGame != this) {
+                players.forEach { hiddenPlayer ->
+                    player.hidePlayer(plugin, hiddenPlayer)
+                }
             }
         }
 
         players.forEach { player ->
-            onlinePlayers.forEach { hiddenPlayer ->
-                player.hidePlayer(plugin, hiddenPlayer)
-            }
+//            players.forEach { visiblePlayer ->
+//                if (player != visiblePlayer) {
+//                    player.showPlayer(plugin, visiblePlayer)
+//                }
+//            }
+            player.currentGame = this
         }
     }
 
     override fun end() {
         val onlinePlayers = Bukkit.getOnlinePlayers()
 
-        onlinePlayers.forEach { player ->
-            players.forEach { visiblePlayer ->
-                player.showPlayer(plugin, visiblePlayer)
-            }
+        players.forEach { player ->
+            player.currentGame = null
+            player.currentRole = null
         }
 
-        players.forEach { player ->
-            onlinePlayers.forEach {
-                player.showPlayer(plugin, it)
+        onlinePlayers.forEach { player ->
+            onlinePlayers.forEach { otherPlayer ->
+                if (player != otherPlayer) {
+                    if (player.currentGame == null && otherPlayer.currentGame == null) {
+                        player.showPlayer(plugin, otherPlayer)
+                    } else if (player.currentGame != otherPlayer.currentGame) {
+                        player.hidePlayer(plugin, otherPlayer)
+                    } else {
+                        player.showPlayer(plugin, otherPlayer)
+                    }
+                }
             }
         }
     }
