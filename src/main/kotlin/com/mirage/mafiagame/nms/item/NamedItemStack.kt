@@ -11,7 +11,7 @@ val CAN_BE_DROPPED_KEY = NamespacedKey("miragemafia", "can_be_dropped")
 var ItemStack.canBeDropped: Boolean
     get() {
         val meta = this.itemMeta
-        return meta?.persistentDataContainer?.get(CAN_BE_DROPPED_KEY, PersistentDataType.BYTE)?.toInt() == 1
+        return meta?.persistentDataContainer?.get(CAN_BE_DROPPED_KEY, PersistentDataType.BYTE)?.toInt() != 0
     }
     set(value) {
         val meta = this.itemMeta

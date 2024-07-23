@@ -17,17 +17,17 @@ class QueueService(
     val queues = mapOf(
         QueueType.FIRST to QueueManager { Queue(2) {
             MafiaGame(plugin, it.toBukkitPlayers(), mapOf(
-                Pair(testLocation, testInventory)
+                testLocation to testInventory
             )).start()
         } },
         QueueType.SECOND to QueueManager { Queue(15) {
             MafiaGame(plugin, it.toBukkitPlayers(), mapOf(
-                Pair(testLocation, testInventory)
+                testLocation to testInventory
             )).start()
         } },
         QueueType.THIRD to QueueManager { Queue(5) {
             MafiaGame(plugin, it.toBukkitPlayers(), mapOf(
-                Pair(testLocation, testInventory)
+                testLocation to testInventory
             )).start()
         } },
     )
