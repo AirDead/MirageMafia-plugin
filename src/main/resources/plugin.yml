@@ -9,6 +9,6 @@ libraries:
 depend:
   - packetevents
 commands:
-  testcmd:
+  test:
     description: Sends a test message to the player
     usage: /test

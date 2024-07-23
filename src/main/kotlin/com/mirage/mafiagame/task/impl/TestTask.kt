@@ -16,6 +16,7 @@ class TestTask : InventoryTask {
     override fun onInventoryClick(player: Player, slot: Int) {
         if (slot == 0) {
             player.sendMessage("You clicked slot 0")
+            onTaskStart(player)
         }
     }
 

@@ -8,6 +8,7 @@ class Captain : Role {
     override val name: String = "Captain"
     override val canRepair: Boolean = true
     override val canBreak: Boolean = true
+    override val canKill: Boolean = true
 
     override fun getInventory(): List<ItemStack> = listOf(
         ItemStack(Material.BOOK)
