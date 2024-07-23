@@ -3,7 +3,6 @@ package com.mirage.mafiagame.game
 import com.github.retrooper.packetevents.util.Vector3i
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.block.Block
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.java.JavaPlugin

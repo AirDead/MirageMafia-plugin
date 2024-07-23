@@ -6,6 +6,7 @@ interface Role {
     val name: String
     val canRepair: Boolean
     val canBreak: Boolean
+    val canKill: Boolean
 
     fun getInventory(): List<ItemStack>
 }

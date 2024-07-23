@@ -11,11 +11,11 @@ import org.bukkit.plugin.java.JavaPlugin
 class QueueService(
     val plugin: JavaPlugin
 ) {
-    val testLocation = Location(Bukkit.getWorld("world"), 155.0, 89.0, 1134.0)
+    val testLocation = Location(Bukkit.getWorld("world"), 177.0, 63.0, 1137.0)
     val testInventory = Bukkit.createInventory(null, 9, "Test Inventory")
 
     val queues = mapOf(
-        QueueType.FIRST to QueueManager { Queue(1) {
+        QueueType.FIRST to QueueManager { Queue(2) {
             MafiaGame(plugin, it.toBukkitPlayers(), mapOf(
                 Pair(testLocation, testInventory)
             )).start()
