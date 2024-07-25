@@ -1,5 +1,7 @@
 package com.mirage.mafiagame.nms.item
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -19,24 +21,28 @@ var ItemStack.canBeDropped: Boolean
         this.itemMeta = meta
     }
 
-
 class NamedItemStack : ItemStack {
+
     constructor(material: Material, name: String) : this(material, 1, name)
 
     constructor(material: Material, amount: Int, name: String) : super(material, amount) {
         val meta: ItemMeta? = itemMeta
-        meta?.setDisplayName(name)
+        meta?.displayName(Component.text(name))
         itemMeta = meta
     }
 
-    constructor(material: Material, amount: Int, name: String, canBeDropped: Boolean) : super(material, amount) {
+    constructor(material: Material, amount: Int, name: String, nameColor: NamedTextColor, canBeDropped: Boolean) : super(material, amount) {
         val meta: ItemMeta? = itemMeta
-        meta?.setDisplayName(name)
+        meta?.displayName(Component.text(name, nameColor))
         itemMeta = meta
         this.canBeDropped = canBeDropped
     }
 
     constructor(material: Material, name: String, canBeDropped: Boolean) : this(material, 1, name) {
+        this.canBeDropped = canBeDropped
+    }
+
+    constructor(material: Material, amount: Int, name: String, canBeDropped: Boolean) : this(material, amount, name) {
         this.canBeDropped = canBeDropped
     }
 }

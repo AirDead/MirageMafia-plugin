@@ -31,8 +31,8 @@ class BlockListener(private val plugin: JavaPlugin) : Listener {
     fun onBlockPlace(event: BlockPlaceEvent) {
         val player = event.player
 
-        if (player.currentGame != null) {
-            event.isCancelled = true
-        }
+        if (player.currentGame == null) return
+
+        event.isCancelled = true
     }
 }

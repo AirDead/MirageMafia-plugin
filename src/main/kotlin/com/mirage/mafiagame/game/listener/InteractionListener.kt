@@ -18,7 +18,7 @@ object InteractionListener : Listener {
 
             player.currentGame?.let { currentGame ->
 
-                val text = Component.text("Бочка заперта...")
+                val text = Component.text("Заперто...")
                     .color(TextColor.color(200, 43, 43))
 
                 val inventory = currentGame.chestInventories[clickedBlock?.location]
