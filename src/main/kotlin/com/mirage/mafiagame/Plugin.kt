@@ -3,9 +3,9 @@ package com.mirage.mafiagame
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.mirage.mafiagame.command.TestCmd
-import com.mirage.mafiagame.game.listener.BlockBreakListener
-import com.mirage.mafiagame.game.listener.BlockInteractionListener
-import com.mirage.mafiagame.game.listener.DropItemListener
+import com.mirage.mafiagame.game.listener.BlockListener
+import com.mirage.mafiagame.game.listener.InteractionListener
+import com.mirage.mafiagame.game.listener.ItemListener
 import com.mirage.mafiagame.game.listener.PlayerAttackPlayerListener
 import com.mirage.mafiagame.network.listener.QueueJoinMessage
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
@@ -28,9 +28,9 @@ class Plugin : JavaPlugin() {
 
         saveDefaultConfig()
 
-        server.pluginManager.registerEvents(BlockBreakListener(this), this)
-        server.pluginManager.registerEvents(BlockInteractionListener, this)
-        server.pluginManager.registerEvents(DropItemListener, this)
+        server.pluginManager.registerEvents(BlockListener(this), this)
+        server.pluginManager.registerEvents(InteractionListener, this)
+        server.pluginManager.registerEvents(ItemListener, this)
         server.pluginManager.registerEvents(PlayerAttackPlayerListener, this)
 
         server.messenger.registerIncomingPluginChannel(this, "mafia:queue", QueueJoinMessage(queueService))

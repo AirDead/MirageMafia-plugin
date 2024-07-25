@@ -54,11 +54,6 @@ class MafiaGame(
         }
 
         players.forEach { player ->
-//            players.forEach { visiblePlayer ->
-//                if (player != visiblePlayer) {
-//                    player.showPlayer(plugin, visiblePlayer)
-//                }
-//            }
             player.currentGame = this
         }
     }
@@ -166,4 +161,8 @@ class MafiaGame(
         brokenBlock = 0
         blockMap.clear() // Clear the blockMap to reset the state
     }
+
+
+
+
 }

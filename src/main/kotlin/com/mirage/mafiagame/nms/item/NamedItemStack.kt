@@ -19,6 +19,7 @@ var ItemStack.canBeDropped: Boolean
         this.itemMeta = meta
     }
 
+
 class NamedItemStack : ItemStack {
     constructor(material: Material, name: String) : this(material, 1, name)
 
