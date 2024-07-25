@@ -3,6 +3,7 @@ package com.mirage.mafiagame.queue
 import com.mirage.mafiagame.game.impl.MafiaGame
 import com.mirage.utils.manager.QueueManager
 import com.mirage.utils.models.Queue
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
@@ -74,7 +75,7 @@ fun loadLocations(config: FileConfiguration): Map<Location, Inventory> {
 }
 
 fun generateRandomInventory(): Inventory {
-    val inventory = Bukkit.createInventory(null, 9, "Эй, что тут у нас...")
+    val inventory = Bukkit.createInventory(null, 9, Component.text("Эй, что тут у нас..."))
 
     val steakCount = (0..5).random()
     repeat(steakCount) {

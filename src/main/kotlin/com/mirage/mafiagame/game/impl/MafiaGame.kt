@@ -12,7 +12,10 @@ import com.mirage.mafiagame.role.RoleAssigner
 import com.mirage.mafiagame.role.currentRole
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
-import net.minecraft.network.chat.Component
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.title.Title
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.world.level.GameType
@@ -25,6 +28,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -54,11 +58,6 @@ class MafiaGame(
         }
 
         players.forEach { player ->
-//            players.forEach { visiblePlayer ->
-//                if (player != visiblePlayer) {
-//                    player.showPlayer(plugin, visiblePlayer)
-//                }
-//            }
             player.currentGame = this
         }
     }
@@ -93,7 +92,7 @@ class MafiaGame(
             true,
             0,
             GameType.SURVIVAL,
-            Component.literal(player.name),
+            net.minecraft.network.chat.Component.literal(player.name),
             null
         )
 
@@ -141,7 +140,16 @@ class MafiaGame(
     }
 
     override fun onSabotageStart() {
-        players.forEach { it.sendTitle("САБОТАЖ.", "У ВАС ЕСТЬ 5 МИНУТ НА УСТРАНЕНИЕ", 10, 70, 20) }
+        val topTitle = Component.text("САБОТАЖ", NamedTextColor.RED)
+        val subTitle = Component.text("У ВАС ЕСТЬ 5 МИНУТ НА УСТРАНЕНИЕ", TextColor.color(255, 255, 255))
+        val time =  Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
+
+        val title = Title.title(topTitle, subTitle, time)
+
+        players.forEach { player ->
+            player.showTitle(title)
+        }
+
         sabotageRunnable = object : BukkitRunnable() {
             override fun run() = onSabotageEnd(false)
         }.runTaskLater(plugin, 20 * 300)
@@ -151,9 +159,15 @@ class MafiaGame(
         sabotageRunnable?.takeIf { !it.isCancelled } ?: return
         sabotageRunnable = null
 
+        val repairedTitle = Title.title(
+            Component.text("САБОТАЖ УСПЕШНО УСТРАНЁН", NamedTextColor.GREEN),
+            Component.empty(),
+            Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
+        )
+
         players.forEach { player ->
             if (isRepaired) {
-                player.sendTitle("САБОТАЖ УСПЕШНО УСТРАНЁН", "", 10, 70, 20)
+                player.showTitle(repairedTitle)
             } else {
                 player.apply {
                     playSound(location, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f)
@@ -164,6 +178,5 @@ class MafiaGame(
         }
         lastSabotageEndTime = System.currentTimeMillis()
         brokenBlock = 0
-        blockMap.clear() // Clear the blockMap to reset the state
     }
 }
