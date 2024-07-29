@@ -12,24 +12,30 @@ import org.bukkit.event.player.PlayerInteractEvent
 object InteractionListener : Listener {
     @EventHandler
     fun onInteract(event: PlayerInteractEvent) {
-        with(event) {
-            if (action != Action.RIGHT_CLICK_BLOCK || clickedBlock?.type !in listOf(Material.CHEST, Material.BARREL)) return
-            isCancelled = true
+        val clickedBlock = event.clickedBlock ?: return
 
-            player.currentGame?.let { currentGame ->
+        if (event.action != Action.RIGHT_CLICK_BLOCK) return
 
-                val text = Component.text("Заперто...")
-                    .color(TextColor.color(200, 43, 43))
+        val player = event.player
+        val game = player.currentGame
 
-                val inventory = currentGame.chestInventories[clickedBlock?.location]
-                if (inventory != null) {
-                    player.openInventory(inventory)
-                } else {
-                    player.sendActionBar(text)
+        when (clickedBlock.type) {
+            Material.CHEST, Material.TRAPPED_CHEST, Material.BARREL -> {
+                event.isCancelled = true
+                game?.let {
+                    val inventory = it.chestInventories[clickedBlock.location]
+                    if (inventory != null) {
+                        player.openInventory(inventory)
+                    } else {
+                        player.sendActionBar(Component.text("Заперто...").color(TextColor.color(200, 43, 43)))
+                    }
                 }
             }
+            Material.RED_BED -> {
+                event.isCancelled = true
+                game?.onPlayerClickBed(player)
+            }
+            else -> {}
         }
     }
-
-
 }

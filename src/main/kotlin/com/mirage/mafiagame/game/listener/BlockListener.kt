@@ -8,7 +8,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class BlockListener(private val plugin: JavaPlugin) : Listener {
+class BlockListener(val plugin: JavaPlugin) : Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
@@ -30,9 +30,8 @@ class BlockListener(private val plugin: JavaPlugin) : Listener {
     @EventHandler
     fun onBlockPlace(event: BlockPlaceEvent) {
         val player = event.player
-
-        if (player.currentGame == null) return
-
-        event.isCancelled = true
+        player.currentGame?.let {
+            event.isCancelled = true
+        }
     }
 }

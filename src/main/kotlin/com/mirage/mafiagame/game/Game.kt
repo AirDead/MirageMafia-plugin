@@ -1,6 +1,7 @@
 package com.mirage.mafiagame.game
 
 import com.github.retrooper.packetevents.util.Vector3i
+import net.kyori.adventure.bossbar.BossBar
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -16,10 +17,13 @@ interface Game {
     val chestInventories: Map<Location, Inventory>
     val blockMap: ConcurrentHashMap<Location, Material>
     var brokenBlock: Int
-    val completedTasks: MutableList<Int>
     var sabotageRunnable: BukkitTask?
-    var lastSabotageEndTime: Long
     val updatedLocations: MutableSet<Vector3i>
+    val completedTasks: MutableSet<Int>
+    var nightSkipVotes: Int
+    var timeRunnable: BukkitTask?
+    val bossBar: BossBar
+    val lastKillTime: MutableMap<UUID, Long>
 
     fun start()
     fun end()
@@ -27,5 +31,9 @@ interface Game {
     fun onBlockBreak(player: Player, block: Material, location: Location)
     fun onSabotageStart()
     fun onSabotageEnd(isRepaired: Boolean)
-
+    fun startDayNightCycle()
+    fun startNight()
+    fun startDay()
+    fun endNight()
+    fun onPlayerClickBed(player: Player)
 }

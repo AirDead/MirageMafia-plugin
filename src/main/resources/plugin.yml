@@ -3,10 +3,10 @@ main: com.mirage.mafiagame.Plugin
 version: 1.0
 api-version: 1.16
 commands:
-  test:
+  locations:
+    description: Location commands
     usage: /<command>
-    description: Command for mafia management
-
+    aliases: [loc]
 libraries:
   - com.mirage:utils:1.0
   - com.mirage:packetapi:1.0

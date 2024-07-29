@@ -3,10 +3,7 @@ package com.mirage.mafiagame
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.mirage.mafiagame.command.TestCmd
-import com.mirage.mafiagame.game.listener.BlockListener
-import com.mirage.mafiagame.game.listener.InteractionListener
-import com.mirage.mafiagame.game.listener.ItemListener
-import com.mirage.mafiagame.game.listener.PlayerAttackPlayerListener
+import com.mirage.mafiagame.game.listener.*
 import com.mirage.mafiagame.network.listener.QueueJoinMessage
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
 import com.mirage.mafiagame.queue.QueueService
@@ -32,14 +29,15 @@ class Plugin : JavaPlugin() {
         server.pluginManager.registerEvents(InteractionListener, this)
         server.pluginManager.registerEvents(ItemListener, this)
         server.pluginManager.registerEvents(PlayerAttackPlayerListener, this)
+        server.pluginManager.registerEvents(ChatListener, this)
 
         server.messenger.registerIncomingPluginChannel(this, "mafia:queue", QueueJoinMessage(queueService))
         server.messenger.registerOutgoingPluginChannel(this, "mafia:queue")
 
-        PacketEvents.getAPI().eventManager.registerListener(BlockUpdateListener, PacketListenerPriority.HIGH)
+        PacketEvents.getAPI().eventManager.registerListener(BlockUpdateListener, PacketListenerPriority.NORMAL)
         PacketEvents.getAPI().init()
 
-        getCommand("test")?.setExecutor(TestCmd(queueService))
+        getCommand("locations")?.setExecutor(TestCmd(queueService))
     }
 
     override fun onDisable() {

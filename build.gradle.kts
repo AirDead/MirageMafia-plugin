@@ -23,7 +23,7 @@ kotlin {
     jvmToolchain(17)
 }
 
-val targetDir = file("C:\\Users\\airdead\\Desktop\\Server\\plugins")
+val targetDir = file("C:\\Users\\airdead\\Desktop\\OrtusC\\work")
 
 tasks.register("obfJarAndMove") {
     dependsOn("reobfJar")

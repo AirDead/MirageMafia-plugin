@@ -1,71 +1,66 @@
-locations:
-  '0':
-    world: world
-    x: 189.0
-    y: 84.0
-    z: 1127.0
-  '1':
-    world: world
-    x: 233.0
-    y: 83.0
-    z: 1133.0
-  '2':
-    world: world
-    x: 232.0
-    y: 89.0
-    z: 1142.0
-  '3':
-    world: world
-    x: 233.0
-    y: 89.0
-    z: 1139.0
-  '4':
-    world: world
-    x: 236.0
-    y: 89.0
-    z: 1130.0
-  '5':
-    world: world
-    x: 186.0
-    y: 89.0
-    z: 1136.0
-  '6':
-    world: world
-    x: 183.0
-    y: 89.0
-    z: 1134.0
-  '7':
-    world: world
-    x: 227.0
-    y: 89.0
-    z: 1130.0
-  '8':
-    world: world
-    x: 170.0
-    y: 94.0
-    z: 1128.0
-  '9':
-    world: world
-    x: 186.0
-    y: 88.0
-    z: 1130.0
-  '10':
-    world: world
-    x: 222.0
-    y: 88.0
-    z: 1118.0
-  '11':
-    world: world
-    x: 213.0
-    y: 89.0
-    z: 1119.0
-  '12':
-    world: world
-    x: 191.0
-    y: 95.0
-    z: 1126.0
-  '13':
-    world: world
-    x: 191.0
-    y: 95.0
-    z: 1126.0
+blocks:
+  1:
+    world: "game"
+    x: 167.0
+    y: 126.0
+    z: 5.0
+  2:
+    world: "game"
+    x: 151.0
+    y: 114.0
+    z: 9.0
+  3:
+    world: "game"
+    x: 187.0
+    y: 104.0
+    z: 3.0
+  4:
+    world: "game"
+    x: 192.0
+    y: 104.0
+    z: 16.0
+  5:
+    world: "game"
+    x: 194.0
+    y: 103.0
+    z: 12.0
+  6:
+    world: "game"
+    x: 193.0
+    y: 104.0
+    z: 13.0
+  7:
+    world: "game"
+    x: 196.0
+    y: 103.0
+    z: 4.0
+  8:
+    world: "game"
+    x: 172.0
+    y: 97.0
+    z: 2.0
+  9:
+    world: "game"
+    x: 149.0
+    y: 99.0
+    z: 1.0
+  10:
+    world: "game"
+    x: 167.0
+    y: 98.0
+    z: 10.0
+  11:
+    world: "game"
+    x: 168.0
+    y: 97.0
+    z: 9.0
+  12:
+    world: "game"
+    x: 182.0
+    y: 103.0
+    z: -8.0
+  13:
+    world: "game"
+    x: 124.0
+    y: 105.0
+    z: 12.0

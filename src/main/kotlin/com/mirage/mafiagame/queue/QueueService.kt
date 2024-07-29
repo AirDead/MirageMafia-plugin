@@ -17,23 +17,22 @@ class QueueService(
     val plugin: JavaPlugin
 ) {
     val config = plugin.config
-    val locations = loadLocations(config)
 
     val queues = mapOf(
         QueueType.FIRST to QueueManager { Queue(1) {
-            val gameLocations = locations.mapValues { generateRandomInventory() }.apply {
+            val gameLocations = loadLocations(config).mapValues { generateRandomInventory() }.apply {
                 addPickaxesToInventories(this.values)
             }
             MafiaGame(plugin, it.toBukkitPlayers(), gameLocations).start()
         } },
         QueueType.SECOND to QueueManager { Queue(15) {
-            val gameLocations = locations.mapValues { generateRandomInventory() }.apply {
+            val gameLocations = loadLocations(config).mapValues { generateRandomInventory() }.apply {
                 addPickaxesToInventories(this.values)
             }
             MafiaGame(plugin, it.toBukkitPlayers(), gameLocations).start()
         } },
         QueueType.THIRD to QueueManager { Queue(5) {
-            val gameLocations = locations.mapValues { generateRandomInventory() }.apply {
+            val gameLocations = loadLocations(config).mapValues { generateRandomInventory() }.apply {
                 addPickaxesToInventories(this.values)
             }
             MafiaGame(plugin, it.toBukkitPlayers(), gameLocations).start()
@@ -54,7 +53,9 @@ fun List<com.mirage.utils.models.Player>.toBukkitPlayers() = mapNotNull { Bukkit
 
 fun loadLocations(config: FileConfiguration): Map<Location, Inventory> {
     val locations = mutableMapOf<Location, Inventory>()
-    val locSection = config.getConfigurationSection("locations")
+    val locSection = config.getConfigurationSection("blocks")
+
+    val allLocations = mutableListOf<Location>()
 
     locSection?.getKeys(false)?.forEach { key ->
         val worldName = locSection.getString("$key.world")
@@ -65,10 +66,15 @@ fun loadLocations(config: FileConfiguration): Map<Location, Inventory> {
 
         if (world != null) {
             val location = Location(world, x, y, z)
-            val inventory = generateRandomInventory()
-
-            locations[location] = inventory
+            allLocations.add(location)
         }
+    }
+
+    val selectedLocations = allLocations.shuffled().take(10)
+
+    selectedLocations.forEach { location ->
+        val inventory = generateRandomInventory()
+        locations[location] = inventory
     }
 
     return locations
