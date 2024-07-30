@@ -22,17 +22,3 @@ tasks.test {
 kotlin {
     jvmToolchain(17)
 }
-
-val targetDir = file("C:\\Users\\airdead\\Desktop\\OrtusC\\work")
-
-tasks.register("obfJarAndMove") {
-    dependsOn("reobfJar")
-    doLast {
-        val jarFile = tasks.named<io.papermc.paperweight.tasks.RemapJar>("reobfJar").get().outputs.files.singleFile
-        copy {
-            from(jarFile)
-            into(targetDir)
-        }
-        println("Moved reobfJar to $targetDir")
-    }
-}

@@ -2,7 +2,7 @@ package com.mirage.mafiagame.game
 
 import org.bukkit.entity.Player
 
-private val gameMap = mutableMapOf<Player, Game>()
+val gameMap = mutableMapOf<Player, Game>()
 
 var Player.currentGame: Game?
     get() = gameMap[this]
@@ -13,11 +13,3 @@ var Player.currentGame: Game?
             gameMap[this] = value
         }
     }
-
-fun Any?.isNotNull(): Boolean {
-    return this != null
-}
-
-fun Any?.isNull(): Boolean {
-    return this == null
-}

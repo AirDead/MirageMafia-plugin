@@ -3,10 +3,14 @@ main: com.mirage.mafiagame.Plugin
 version: 1.0
 api-version: 1.16
 commands:
-  locations:
-    description: Location commands
+  mafia:
+    description: Mafia command
     usage: /<command>
-    aliases: [loc]
+    aliases: [maf]
+  sudo:
+    description: Sudo command
+    usage: /<command> <player> <command>
+    aliases: [su, s]
 libraries:
   - com.mirage:utils:1.0
   - com.mirage:packetapi:1.0

@@ -14,10 +14,10 @@ class Captain : Role {
 
     override fun getInventory(): List<ItemStack> {
         return listOf(
-            NamedItemStack(Material.CARVED_PUMPKIN, "Кепка капитана"),
-            NamedItemStack(Material.STICK, "Трость с черепом"),
-            NamedItemStack(Material.WRITABLE_BOOK, "Деревянный планшет с бумагами"),
-            NamedItemStack(Material.BREAD, 5, "Галеты")
+            NamedItemStack(Material.CARVED_PUMPKIN, "Кепка капитана", true),
+            NamedItemStack(Material.STICK, "Трость с черепом", true),
+            NamedItemStack(Material.WRITABLE_BOOK, "Деревянный планшет с бумагами", true),
+            NamedItemStack(Material.BREAD, 5, "Галеты", true)
         )
     }
 }

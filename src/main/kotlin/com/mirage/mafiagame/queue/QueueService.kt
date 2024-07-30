@@ -23,19 +23,19 @@ class QueueService(
             val gameLocations = loadLocations(config).mapValues { generateRandomInventory() }.apply {
                 addPickaxesToInventories(this.values)
             }
-            MafiaGame(plugin, it.toBukkitPlayers(), gameLocations).start()
+            MafiaGame(plugin, it.toBukkitPlayers().toMutableList(), gameLocations).start()
         } },
         QueueType.SECOND to QueueManager { Queue(15) {
             val gameLocations = loadLocations(config).mapValues { generateRandomInventory() }.apply {
                 addPickaxesToInventories(this.values)
             }
-            MafiaGame(plugin, it.toBukkitPlayers(), gameLocations).start()
+            MafiaGame(plugin, it.toBukkitPlayers().toMutableList(), gameLocations).start()
         } },
         QueueType.THIRD to QueueManager { Queue(5) {
             val gameLocations = loadLocations(config).mapValues { generateRandomInventory() }.apply {
                 addPickaxesToInventories(this.values)
             }
-            MafiaGame(plugin, it.toBukkitPlayers(), gameLocations).start()
+            MafiaGame(plugin, it.toBukkitPlayers().toMutableList(), gameLocations).start()
         } },
     )
 

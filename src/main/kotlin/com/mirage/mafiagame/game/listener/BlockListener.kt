@@ -17,7 +17,9 @@ class BlockListener(val plugin: JavaPlugin) : Listener {
 
         event.isCancelled = true
 
-        if (player.inventory.itemInMainHand.type != Material.IRON_PICKAXE) return
+        if (player.inventory.itemInMainHand.type !in listOf(Material.IRON_PICKAXE, Material.NETHERITE_PICKAXE, Material.GOLDEN_PICKAXE, Material.DIAMOND_PICKAXE, Material.STONE_PICKAXE, Material.WOODEN_PICKAXE)) {
+            return
+        }
 
         val location = event.block.location
         val block = game.blockMap[location] ?: event.block.type

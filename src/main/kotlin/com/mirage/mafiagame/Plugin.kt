@@ -2,7 +2,8 @@ package com.mirage.mafiagame
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketListenerPriority
-import com.mirage.mafiagame.command.TestCmd
+import com.mirage.mafiagame.command.MafiaCommand
+import com.mirage.mafiagame.command.SudoCommand
 import com.mirage.mafiagame.game.listener.*
 import com.mirage.mafiagame.network.listener.QueueJoinMessage
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
@@ -26,9 +27,9 @@ class Plugin : JavaPlugin() {
         saveDefaultConfig()
 
         server.pluginManager.registerEvents(BlockListener(this), this)
+        server.pluginManager.registerEvents(PlayerListener(this), this)
         server.pluginManager.registerEvents(InteractionListener, this)
         server.pluginManager.registerEvents(ItemListener, this)
-        server.pluginManager.registerEvents(PlayerAttackPlayerListener, this)
         server.pluginManager.registerEvents(ChatListener, this)
 
         server.messenger.registerIncomingPluginChannel(this, "mafia:queue", QueueJoinMessage(queueService))
@@ -37,10 +38,15 @@ class Plugin : JavaPlugin() {
         PacketEvents.getAPI().eventManager.registerListener(BlockUpdateListener, PacketListenerPriority.NORMAL)
         PacketEvents.getAPI().init()
 
-        getCommand("locations")?.setExecutor(TestCmd(queueService))
+        getCommand("mafia")?.setExecutor(MafiaCommand(queueService))
+        getCommand("sudo")?.setExecutor(SudoCommand)
     }
 
     override fun onDisable() {
         PacketEvents.getAPI().terminate()
     }
 }
+
+
+
+

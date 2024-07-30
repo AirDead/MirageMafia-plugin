@@ -13,7 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 interface Game {
     val plugin: JavaPlugin
-    val players: List<Player>
+    val players: MutableList<Player>
+    val killedPlayers: MutableSet<Player>
     val chestInventories: Map<Location, Inventory>
     val blockMap: ConcurrentHashMap<Location, Material>
     var brokenBlock: Int
@@ -22,18 +23,26 @@ interface Game {
     val completedTasks: MutableSet<Int>
     var nightSkipVotes: Int
     var timeRunnable: BukkitTask?
+    var isNight: Boolean
     val bossBar: BossBar
-    val lastKillTime: MutableMap<UUID, Long>
+    val lastKillTime: MutableMap<String, Long>
+    var isVoting: Boolean
+    val votingMap: MutableMap<String, Int>
+    val skipVoters: MutableSet<UUID>
+    val kickVoters: MutableSet<UUID>
 
     fun start()
-    fun end()
+    fun end(isMafiaWin: Boolean)
     fun onMafiaKill(player: Player)
     fun onBlockBreak(player: Player, block: Material, location: Location)
     fun onSabotageStart()
     fun onSabotageEnd(isRepaired: Boolean)
+    fun startVoting(whoStarted: Player)
+    fun endVoting()
+    fun openVotingMenu(player: Player)
     fun startDayNightCycle()
     fun startNight()
-    fun startDay()
     fun endNight()
     fun onPlayerClickBed(player: Player)
+    fun checkGameEnd()
 }
