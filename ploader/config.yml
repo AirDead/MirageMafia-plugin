@@ -1,0 +1,18 @@
+rcon:
+  host: "95.216.32.187"
+  port: 46973
+  password: "KFfgrsVqbLjk5QyxQV44LS4B"
+
+sftp:
+  host: "95.216.32.187"
+  port: 2022
+  username: "mafia"
+  password: "RK}pZM#HU8qMu*n"
+
+actions:
+  - action: "upload"
+    source: "../build/libs/MirageMafia-rework-1.0.jar"
+    destination: "/plugins/MirageMafia-rework-1.0.jar"
+
+  - action: "command"
+    command: "stop"
