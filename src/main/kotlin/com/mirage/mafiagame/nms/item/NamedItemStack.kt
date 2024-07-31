@@ -8,9 +8,9 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 
-val CAN_BE_DROPPED_KEY = NamespacedKey("miragemafia", "can_be_dropped")
+val CAN_BE_DROPPED_KEY = NamespacedKey("miragemafia", "can_be_traded")
 
-var ItemStack.canBeDropped: Boolean
+var ItemStack.canBeTraded: Boolean
     get() {
         val meta = this.itemMeta
         return meta?.persistentDataContainer?.get(CAN_BE_DROPPED_KEY, PersistentDataType.BYTE)?.toInt() != 0
@@ -31,18 +31,18 @@ class NamedItemStack : ItemStack {
         itemMeta = meta
     }
 
-    constructor(material: Material, amount: Int, name: String, nameColor: NamedTextColor, canBeDropped: Boolean) : super(material, amount) {
+    constructor(material: Material, amount: Int, name: String, nameColor: NamedTextColor, canBeTraded: Boolean) : super(material, amount) {
         val meta: ItemMeta? = itemMeta
         meta?.displayName(Component.text(name, nameColor))
         itemMeta = meta
-        this.canBeDropped = canBeDropped
+        this.canBeTraded = canBeTraded
     }
 
-    constructor(material: Material, name: String, canBeDropped: Boolean) : this(material, 1, name) {
-        this.canBeDropped = canBeDropped
+    constructor(material: Material, name: String, canBeTraded: Boolean) : this(material, 1, name) {
+        this.canBeTraded = canBeTraded
     }
 
-    constructor(material: Material, amount: Int, name: String, canBeDropped: Boolean) : this(material, amount, name) {
-        this.canBeDropped = canBeDropped
+    constructor(material: Material, amount: Int, name: String, canBeTraded: Boolean) : this(material, amount, name) {
+        this.canBeTraded = canBeTraded
     }
 }

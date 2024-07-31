@@ -5,6 +5,7 @@ import com.mirage.mafiagame.queue.QueueService
 import com.mirage.mafiagame.queue.QueueType
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -20,6 +21,12 @@ class MafiaCommand(
             return true
         }
 
+        val onlinePlayers = Bukkit.getOnlinePlayers()
+
+//        onlinePlayers.forEach {
+//            sender.hidePlayer(plugin, it)
+//            it.hidePlayer(plugin, sender)
+//        }
         if (sender.currentGame == null) {
             queue.joinQueue(sender, QueueType.FIRST)
             sender.sendMessage(
