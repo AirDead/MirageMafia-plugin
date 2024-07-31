@@ -47,6 +47,7 @@ class PlayerListener(
         gameMap.forEach { (_, game) ->
             game.players.forEach {
                 it.hidePlayer(plugin, player)
+                player.hidePlayer(plugin, it)
             }
         }
     }
@@ -58,7 +59,7 @@ class PlayerListener(
 
         player.teleport(Location(Bukkit.getWorld("world"), 157.0, 286.0, 127.0))
         player.inventory.clear()
-        game?.checkGameEnd()
         game?.killedPlayers?.add(player)
+        game?.checkGameEnd()
     }
 }
