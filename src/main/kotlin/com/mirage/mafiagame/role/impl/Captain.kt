@@ -1,6 +1,5 @@
 package com.mirage.mafiagame.role.impl
 
-
 import com.mirage.mafiagame.nms.item.NamedItemStack
 import com.mirage.mafiagame.role.Role
 import org.bukkit.Material
@@ -15,10 +14,10 @@ class Captain : Role {
 
     override fun getInventory(): List<ItemStack> {
         return listOf(
-            NamedItemStack(Material.CARVED_PUMPKIN, "Кепка капитана", false),
-            NamedItemStack(Material.STICK, "Трость с черепом", false),
-            NamedItemStack(Material.WRITABLE_BOOK, "Деревянный планшет с бумагами", false),
-            NamedItemStack(Material.BREAD, 5, "Галеты", false)
+            NamedItemStack(Material.CARVED_PUMPKIN, "Кепка капитана", true),
+            NamedItemStack(Material.STICK, "Трость с черепом", true),
+            NamedItemStack(Material.WRITABLE_BOOK, "Деревянный планшет с бумагами", true),
+            NamedItemStack(Material.BREAD, 5, "Галеты", true)
         )
     }
 }
