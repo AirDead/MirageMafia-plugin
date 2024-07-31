@@ -3,14 +3,16 @@ package com.mirage.mafiagame.game.impl
 import com.github.retrooper.packetevents.util.Vector3i
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
+import com.mirage.mafiagame.module.module
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.item.NamedItemStack
 import com.mirage.mafiagame.nms.npc.Corpse
 import com.mirage.mafiagame.queue.addPickaxesToInventories
 import com.mirage.mafiagame.queue.generateRandomInventory
-import com.mirage.mafiagame.role.RoleAssigner
+import com.mirage.mafiagame.role.RoleAssignService
 import com.mirage.mafiagame.role.currentRole
+import com.mirage.mafiagame.tooling.LocationService
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
 import net.kyori.adventure.bossbar.BossBar
@@ -37,10 +39,10 @@ import java.util.concurrent.ConcurrentHashMap
 
 class MafiaGame(
     override val plugin: JavaPlugin,
-    override val players: MutableList<Player>,
-    override val chestInventories: Map<Location, Inventory>
+    override val players: MutableList<Player>
 ) : Game {
     override val killedPlayers = mutableSetOf<Player>()
+    override val chestInventories = mutableMapOf<Location, Inventory>()
     override val lastKillTime = mutableMapOf<String, Long>()
     override val updatedLocations = mutableSetOf<Vector3i>()
     override val completedTasks = mutableSetOf<Int>()
@@ -56,12 +58,15 @@ class MafiaGame(
     override val skipVoters = mutableSetOf<UUID>()
     override val kickVoters = mutableSetOf<UUID>()
 
+    val locationService by module<LocationService>()
+
     override fun start() {
         val onlinePlayers = Bukkit.getOnlinePlayers()
-        RoleAssigner.assignRoles(players)
+        val assigner by module<RoleAssignService>()
+        assigner.assignRoles(players)
         players.forEach { player ->
             player.currentGame = this
-            player.teleport(Location(Bukkit.getWorld("game"), 167.0, 109.0, 8.0))
+            player.teleport(locationService.gameLocation)
             bossBar.let { player.showBossBar(it) }
             onlinePlayers.forEach {
                 if (it !in players) {
@@ -70,8 +75,11 @@ class MafiaGame(
                 }
             }
         }
+
+        fillChestInventories(locationService.chestLocations.shuffled().take(10))
         startDayNightCycle()
     }
+
 
     override fun end(isMafiaWin: Boolean) {
         val onlinePlayers = Bukkit.getOnlinePlayers()
@@ -310,7 +318,7 @@ class MafiaGame(
     override fun startDayNightCycle() {
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             startNight()
-            }, 4 * 60 * 20)
+            }, 10 * 60 * 20) // 4 minutes
     }
 
     override fun startNight() {
@@ -325,17 +333,18 @@ class MafiaGame(
 
         players.forEach { player ->
             player.showTitle(title)
+            player.sendMessage(Component.text("Ночь наступила", NamedTextColor.BLUE))
             player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 20 * 4 * 60, 4))
         }
 
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             endNight()
-        }, 4 * 60 * 20)
+        }, 4 * 60 * 20) // 4 minutes
     }
 
     override fun endNight() {
         isNight = false
-        clearChestInventories()
+        fillChestInventories(chestInventories.keys.toList())
         val title = Title.title(
             Component.text("День наступил!").color(NamedTextColor.YELLOW),
             Component.text("Иконка солнца").color(NamedTextColor.GREEN)
@@ -349,32 +358,27 @@ class MafiaGame(
             player.removePotionEffect(PotionEffectType.BLINDNESS)
             player.removePotionEffect(PotionEffectType.SLOW)
             player.showTitle(title)
+            player.sendMessage(Component.text("День наступил", NamedTextColor.YELLOW))
+            player.wakeup(false)
         }
 
-        timeRunnable?.cancel()
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             startNight()
-        }, 4 * 60 * 20)
+        }, 10 * 60 * 20)
     }
 
-    private fun clearChestInventories() {
-        chestInventories.values.forEach { inventory ->
-            inventory.clear()
-            val newInventory = generateRandomInventory()
-            addPickaxesToInventories(listOf(newInventory))
-            inventory.contents = newInventory.contents
-        }
-    }
-
-    override fun onPlayerClickBed(player: Player) {
+    override fun onPlayerClickBed(player: Player, location: Location) {
         if (!isNight) return
         val alive = players.size - killedPlayers.size
         nightSkipVotes++
-        player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 20 * 4 * 60, 255))
+        player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 20 * 4 * 60, 3))
+        player.sleep(location, true)
 
-        if (nightSkipVotes > alive / 2) {
-            endNight()
-        }
+        plugin.server.scheduler.runTaskLater(plugin, Runnable {
+            if (nightSkipVotes > alive / 2) {
+                endNight()
+            }
+        }, 10)
     }
 
     override fun checkGameEnd() {
@@ -387,6 +391,14 @@ class MafiaGame(
         }
         else if(nonMafiaPlayers.isEmpty() || nonMafiaPlayers.size <= mafiaPlayers.size) {
             end(true)
+        }
+    }
+
+    fun fillChestInventories(locations: List<Location>) {
+        locations.forEach { location ->
+            chestInventories[location] = generateRandomInventory().apply {
+                addPickaxesToInventories(listOf(this))
+            }
         }
     }
 }

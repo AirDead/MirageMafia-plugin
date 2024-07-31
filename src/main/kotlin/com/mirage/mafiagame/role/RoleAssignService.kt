@@ -1,43 +1,49 @@
 package com.mirage.mafiagame.role
 
+import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.role.impl.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.plugin.java.JavaPlugin
 
-object RoleAssigner {
-    private val roles = listOf(
-        Captain(), FirstMate(), ChiefMechanic(), JuniorMechanic(), Cook(), AssistantCook(), PrivateDetective()
-    )
+class RoleAssignService(app: JavaPlugin) : BaseModule<RoleAssignService>(app) {
+
+    private lateinit var roles: MutableList<Role>
+
+    override fun onLoad() {
+        roles = mutableListOf(
+            Captain(), FirstMate(), ChiefMechanic(), JuniorMechanic(), Cook(), AssistantCook(), PrivateDetective()
+        )
+    }
+
+    override fun onUnload() {
+        roles.clear()
+    }
 
     fun assignRoles(players: List<Player>) {
         val mafiaCount = getMafiaCount(players.size)
         val shuffledPlayers = players.shuffled()
-        val assignedRoles = mutableListOf<Pair<Player, Role>>()
         val originalRoles = mutableMapOf<Player, Role>()
 
         shuffledPlayers.forEachIndexed { index, player ->
             val role = if (index < roles.size) roles[index] else Sailor()
-            assignedRoles.add(player to role)
             originalRoles[player] = role
         }
 
         val mafiaPlayers = shuffledPlayers.shuffled().take(mafiaCount)
-        mafiaPlayers.forEach { player ->
-            val originalRole = originalRoles[player]!!
-            assignedRoles.replaceAll { (p, role) ->
-                if (p == player) {
-                    player to object : Role by originalRole {
-                        override val name = "${originalRole.name} (Мафия)"
-                        override var canBreak = true
-                        override var canKill = true
+        val assignedRoles = originalRoles.map { (player, role) ->
+            if (mafiaPlayers.contains(player)) {
+                player to object : Role by role {
+                    override val name = "${role.name} (Мафия)"
+                    override var canBreak = true
+                    override var canKill = true
 
-                        override fun getInventory(): List<ItemStack>  {
-                            return originalRole.getInventory() + Mafia().getInventory()
-                        }
+                    override fun getInventory(): List<ItemStack> {
+                        return role.getInventory() + Mafia().getInventory()
                     }
-                } else {
-                    p to role
                 }
+            } else {
+                player to role
             }
         }
 

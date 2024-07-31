@@ -1,6 +1,8 @@
 package com.mirage.mafiagame.command
 
 import com.mirage.mafiagame.game.currentGame
+import com.mirage.mafiagame.module.BaseModule
+import com.mirage.mafiagame.module.module
 import com.mirage.mafiagame.queue.QueueService
 import com.mirage.mafiagame.queue.QueueType
 import net.kyori.adventure.text.Component
@@ -10,10 +12,18 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
 
-class MafiaCommand(
-    val queue: QueueService
-) : CommandExecutor {
+class MafiaCommand(app: JavaPlugin) : BaseModule<MafiaCommand>(app), CommandExecutor {
+    private val queueService: QueueService by module()
+
+    override fun onLoad() {
+        app.getCommand("mafia")?.setExecutor(this)
+    }
+
+    override fun onUnload() {
+        app.getCommand("mafia")?.setExecutor(null)
+    }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
         if (sender !is Player) {
@@ -23,26 +33,33 @@ class MafiaCommand(
 
         val onlinePlayers = Bukkit.getOnlinePlayers()
 
-//        onlinePlayers.forEach {
-//            sender.hidePlayer(plugin, it)
-//            it.hidePlayer(plugin, sender)
-//        }
         if (sender.currentGame == null) {
-            queue.joinQueue(sender, QueueType.FIRST)
+            queueService.joinQueue(sender, QueueType.FIRST)
             sender.sendMessage(
-                Component
-                    .text("Вы зашли в очередь")
-                    .color(NamedTextColor.GREEN)
+                Component.text("Вы зашли в очередь").color(NamedTextColor.GREEN)
             )
-        } else if (args[0] == "start") {
-            sender.currentGame?.startVoting(sender)
-        } else if (args[0] == "stop") {
-            sender.currentGame?.endVoting()
+        } else if (args.isNotEmpty()) {
+            when (args[0]) {
+                "start" -> {
+                    sender.currentGame?.startVoting(sender)
+                }
+                "stop" -> {
+                    sender.currentGame?.endVoting()
+                }
+                "location" -> {
+                    val targetBlock = sender.getTargetBlock(null, 5) // 5 - это максимальная дистанция, можно изменить при необходимости
+                    val location = targetBlock.location
+                    sender.sendMessage(
+                        Component.text("Вы смотрите на блок с локацией: x=${location.x}, y=${location.y}, z=${location.z}").color(NamedTextColor.YELLOW)
+                    )
+                }
+                else -> {
+                    sender.sendMessage(Component.text("Unknown command").color(NamedTextColor.RED))
+                }
+            }
         } else {
-            println("1")
+            sender.sendMessage(Component.text("Usage: /mafia <command>").color(NamedTextColor.RED))
         }
-
-
 
         return true
     }

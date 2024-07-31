@@ -2,6 +2,7 @@ name: MafiaGame
 main: com.mirage.mafiagame.Plugin
 version: 1.0
 api-version: 1.16
+
 commands:
   mafia:
     description: Mafia command
@@ -11,9 +12,11 @@ commands:
     description: Sudo command
     usage: /<command> <player> <command>
     aliases: [su, s]
+
 libraries:
   - com.mirage:utils:1.0
   - com.mirage:packetapi:1.0
   - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0
+
 depend:
   - packetevents
