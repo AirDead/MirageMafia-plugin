@@ -14,6 +14,7 @@ repositories {
 dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     compileOnly(fileTree("./libs"))
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 }
 
 tasks.test {

@@ -8,7 +8,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.plugin.java.JavaPlugin
 
-class ChatListener(app: JavaPlugin) : BaseModule<ChatListener>(app), Listener {
+class ChatListener(app: JavaPlugin) : BaseModule(app), Listener {
 
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)

@@ -12,7 +12,7 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
-class QueueService(app: JavaPlugin) : BaseModule<QueueService>(app) {
+class QueueService(app: JavaPlugin) : BaseModule(app) {
 
     private val queues = mutableMapOf<QueueType, QueueManager>()
 

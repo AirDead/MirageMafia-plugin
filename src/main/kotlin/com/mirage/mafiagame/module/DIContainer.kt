@@ -1,15 +1,18 @@
 package com.mirage.mafiagame.module
 
 object DIContainer {
-    private val services = mutableMapOf<Class<*>, Any>()
+    private val services = mutableMapOf<Class<out BaseModule>, BaseModule>()
 
-    fun <T : Any> register(serviceClass: Class<T>, instance: T) {
-        services[serviceClass] = instance
+    fun <T : BaseModule> register(clazz: Class<out T>, service: T) {
+        services[clazz] = service
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T : Any> resolve(serviceClass: Class<T>): T {
-        return services[serviceClass] as? T
-            ?: throw IllegalArgumentException("Service of type ${serviceClass.simpleName} not registered")
+    fun <T : BaseModule> resolve(clazz: Class<out T>): T? {
+        return services[clazz] as? T
+    }
+
+    fun <T : BaseModule> unregister(clazz: Class<out T>) {
+        services.remove(clazz)?.onUnload()
     }
 }

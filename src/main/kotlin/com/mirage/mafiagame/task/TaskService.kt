@@ -9,7 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class TaskService(app: JavaPlugin) : BaseModule<TaskService>(app), Listener {
+class TaskService(app: JavaPlugin) : BaseModule(app), Listener {
     private val activeTasks = mutableMapOf<Player, Task>()
 
     override fun onLoad() {

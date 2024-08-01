@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class PlayerListener(app: JavaPlugin) : BaseModule<PlayerListener>(app), Listener {
+class PlayerListener(app: JavaPlugin) : BaseModule(app), Listener {
 
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)

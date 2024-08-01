@@ -13,7 +13,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class InteractionListener(app: JavaPlugin) : BaseModule<InteractionListener>(app), Listener {
+class InteractionListener(app: JavaPlugin) : BaseModule(app), Listener {
 
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)

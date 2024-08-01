@@ -10,7 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.messaging.PluginMessageListener
 import java.nio.ByteBuffer
 
-class QueueJoinService(app: JavaPlugin) : BaseModule<QueueJoinService>(app), PluginMessageListener {
+class QueueJoinService(app: JavaPlugin) : BaseModule(app), PluginMessageListener {
     private val queueService: QueueService by module()
 
     override fun onLoad() {

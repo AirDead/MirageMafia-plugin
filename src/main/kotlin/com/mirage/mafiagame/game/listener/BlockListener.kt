@@ -9,7 +9,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class BlockListener(app: JavaPlugin) : BaseModule<BlockListener>(app), Listener {
+class BlockListener(app: JavaPlugin) : BaseModule(app), Listener {
 
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)

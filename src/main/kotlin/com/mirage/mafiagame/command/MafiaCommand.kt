@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
-class MafiaCommand(app: JavaPlugin) : BaseModule<MafiaCommand>(app), CommandExecutor {
+class MafiaCommand(app: JavaPlugin) : BaseModule(app), CommandExecutor {
     private val queueService: QueueService by module()
 
     override fun onLoad() {

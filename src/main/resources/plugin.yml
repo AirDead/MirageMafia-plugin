@@ -17,6 +17,7 @@ libraries:
   - com.mirage:utils:1.0
   - com.mirage:packetapi:1.0
   - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.0
+  - org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1
 
 depend:
   - packetevents
