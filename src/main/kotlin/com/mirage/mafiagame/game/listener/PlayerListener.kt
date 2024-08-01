@@ -2,6 +2,7 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.gameMap
+import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.role.currentRole
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -16,9 +17,17 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class PlayerListener(
-    val plugin: JavaPlugin
-) : Listener {
+class PlayerListener(app: JavaPlugin) : BaseModule<PlayerListener>(app), Listener {
+
+    override fun onLoad() {
+        app.server.pluginManager.registerEvents(this, app)
+    }
+
+    override fun onUnload() {
+        EntityDamageByEntityEvent.getHandlerList().unregister(this)
+        PlayerJoinEvent.getHandlerList().unregister(this)
+        PlayerQuitEvent.getHandlerList().unregister(this)
+    }
 
     @EventHandler
     fun onPlayerAttackPlayer(event: EntityDamageByEntityEvent) {
@@ -46,8 +55,8 @@ class PlayerListener(
 
         gameMap.forEach { (_, game) ->
             game.players.forEach {
-                it.hidePlayer(plugin, player)
-                player.hidePlayer(plugin, it)
+                it.hidePlayer(app, player)
+                player.hidePlayer(app, it)
             }
         }
     }

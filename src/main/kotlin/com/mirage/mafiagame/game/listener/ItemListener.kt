@@ -1,5 +1,6 @@
 package com.mirage.mafiagame.game.listener
 
+import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.nms.item.canBeTraded
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -10,8 +11,19 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.plugin.java.JavaPlugin
 
-object ItemListener : Listener {
+class ItemListener(app: JavaPlugin) : BaseModule<ItemListener>(app), Listener {
+
+    override fun onLoad() {
+        app.server.pluginManager.registerEvents(this, app)
+    }
+
+    override fun onUnload() {
+        PlayerDropItemEvent.getHandlerList().unregister(this)
+        PlayerInteractAtEntityEvent.getHandlerList().unregister(this)
+    }
+
     @EventHandler
     fun onDropItem(event: PlayerDropItemEvent) {
         event.isCancelled = true
@@ -59,5 +71,4 @@ object ItemListener : Listener {
             target.sendActionBar(Component.text("Вам передали предмет...").color(NamedTextColor.GREEN))
         }
     }
-
 }

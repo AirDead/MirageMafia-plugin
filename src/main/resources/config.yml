@@ -1,66 +1,78 @@
-blocks:
+gameLocation:
+  world: world
+  x: 200.0
+  y: 70.0
+  z: 200.0
+
+lobbyLocation:
+  world: world
+  x: 50.0
+  y: 65.0
+  z: 50.0
+
+chests:
   1:
-    world: "game"
+    world: world
     x: 167.0
     y: 126.0
     z: 5.0
   2:
-    world: "game"
+    world: world
     x: 151.0
     y: 114.0
     z: 9.0
   3:
-    world: "game"
+    world: world
     x: 187.0
     y: 104.0
     z: 3.0
   4:
-    world: "game"
+    world: world
     x: 192.0
     y: 104.0
     z: 16.0
   5:
-    world: "game"
+    world: world
     x: 194.0
     y: 103.0
     z: 12.0
   6:
-    world: "game"
+    world: world
     x: 193.0
     y: 104.0
     z: 13.0
   7:
-    world: "game"
+    world: world
     x: 196.0
     y: 103.0
     z: 4.0
   8:
-    world: "game"
+    world: world
     x: 172.0
     y: 97.0
     z: 2.0
   9:
-    world: "game"
+    world: world
     x: 149.0
     y: 99.0
     z: 1.0
   10:
-    world: "game"
+    world: world
     x: 167.0
     y: 98.0
     z: 10.0
   11:
-    world: "game"
+    world: world
     x: 168.0
     y: 97.0
     z: 9.0
   12:
-    world: "game"
+    world: world
     x: 182.0
     y: 103.0
     z: -8.0
   13:
-    world: "game"
+    world: world
     x: 124.0
     y: 105.0
     z: 12.0

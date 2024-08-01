@@ -43,6 +43,6 @@ interface Game {
     fun startDayNightCycle()
     fun startNight()
     fun endNight()
-    fun onPlayerClickBed(player: Player)
+    fun onPlayerClickBed(player: Player, location: Location)
     fun checkGameEnd()
 }
