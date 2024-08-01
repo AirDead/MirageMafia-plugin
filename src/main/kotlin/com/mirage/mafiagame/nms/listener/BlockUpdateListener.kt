@@ -17,7 +17,7 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
-class BlockUpdateListener(app: JavaPlugin) : BaseModule<BlockUpdateListener>(app) {
+class BlockUpdateListener(app: JavaPlugin) : BaseModule(app) {
 
     override fun onLoad() {
         PacketEvents.getAPI().eventManager.registerListener(BlockUpdatePacketListener)

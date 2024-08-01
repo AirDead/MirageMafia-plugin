@@ -1,11 +1,22 @@
 package com.mirage.mafiagame.command
 
+import com.mirage.mafiagame.module.BaseModule
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
+import org.bukkit.plugin.java.JavaPlugin
 
-object SudoCommand : CommandExecutor {
+class SudoCommand(app: JavaPlugin) : BaseModule(app), CommandExecutor {
+
+    override fun onLoad() {
+        app.getCommand("sudo")?.setExecutor(this)
+    }
+
+    override fun onUnload() {
+        app.getCommand("sudo")?.setExecutor(null)
+    }
+
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
         if (!sender.isOp) return false
         if (args == null || args.size < 2) return false

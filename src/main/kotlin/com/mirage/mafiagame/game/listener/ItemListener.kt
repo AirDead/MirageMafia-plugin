@@ -13,7 +13,7 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.plugin.java.JavaPlugin
 
-class ItemListener(app: JavaPlugin) : BaseModule<ItemListener>(app), Listener {
+class ItemListener(app: JavaPlugin) : BaseModule(app), Listener {
 
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)

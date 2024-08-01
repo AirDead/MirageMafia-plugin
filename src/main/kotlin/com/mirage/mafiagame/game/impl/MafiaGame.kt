@@ -1,6 +1,7 @@
 package com.mirage.mafiagame.game.impl
 
 import com.github.retrooper.packetevents.util.Vector3i
+import com.mirage.mafiagame.config.ConfigService
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.module.module
@@ -12,7 +13,6 @@ import com.mirage.mafiagame.queue.addPickaxesToInventories
 import com.mirage.mafiagame.queue.generateRandomInventory
 import com.mirage.mafiagame.role.RoleAssignService
 import com.mirage.mafiagame.role.currentRole
-import com.mirage.mafiagame.tooling.LocationService
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
 import net.kyori.adventure.bossbar.BossBar
@@ -58,7 +58,7 @@ class MafiaGame(
     override val skipVoters = mutableSetOf<UUID>()
     override val kickVoters = mutableSetOf<UUID>()
 
-    val locationService by module<LocationService>()
+    val configService by module<ConfigService>()
 
     override fun start() {
         val onlinePlayers = Bukkit.getOnlinePlayers()
@@ -66,7 +66,7 @@ class MafiaGame(
         assigner.assignRoles(players)
         players.forEach { player ->
             player.currentGame = this
-            player.teleport(locationService.gameLocation)
+            player.teleport(configService.config.gameLocation)
             bossBar.let { player.showBossBar(it) }
             onlinePlayers.forEach {
                 if (it !in players) {
@@ -76,7 +76,7 @@ class MafiaGame(
             }
         }
 
-        fillChestInventories(locationService.chestLocations.shuffled().take(10))
+        fillChestInventories(configService.config.chestLocations.shuffled().take(10))
         startDayNightCycle()
     }
 
@@ -285,10 +285,6 @@ class MafiaGame(
             it.showTitle(finalTitle)
             it.sendMessage(finalMessage)
             it.inventory.remove(Material.ENCHANTED_BOOK)
-        }
-
-        if (maxVotes != null && votingMap.values.count { it == maxVotes } <= 1) {
-            checkGameEnd()
         }
 
         votingMap.clear()

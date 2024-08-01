@@ -6,7 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
-class RoleAssignService(app: JavaPlugin) : BaseModule<RoleAssignService>(app) {
+class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
 
     private lateinit var roles: MutableList<Role>
 

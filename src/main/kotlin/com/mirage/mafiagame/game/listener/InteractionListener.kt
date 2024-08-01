@@ -1,7 +1,9 @@
 package com.mirage.mafiagame.game.listener
 
+import com.mirage.mafiagame.config.ConfigService
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.module.BaseModule
+import com.mirage.mafiagame.module.module
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Material
@@ -13,8 +15,8 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.plugin.java.JavaPlugin
 
-class InteractionListener(app: JavaPlugin) : BaseModule<InteractionListener>(app), Listener {
-
+class InteractionListener(app: JavaPlugin) : BaseModule(app), Listener {
+    val storage by module<ConfigService>()
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)
     }
@@ -55,6 +57,15 @@ class InteractionListener(app: JavaPlugin) : BaseModule<InteractionListener>(app
             }
             Material.RED_BED -> {
                 game.onPlayerClickBed(player, clickedBlock.location)
+            }
+            Material.STONE_BUTTON -> {
+                val config = storage.config
+                val maxDistance = 3
+                if (config.startMeetingLocation.distance(player.location) <= maxDistance) {
+                    game.startVoting(player)
+                } else if (config.endMeetingLocation.distance(player.location) <= maxDistance) {
+                    game.endVoting()
+                }
             }
             else -> {}
         }

@@ -2,7 +2,7 @@ package com.mirage.mafiagame.module
 
 import kotlin.reflect.KProperty
 
-class ModuleDelegate<T : Module>(private val moduleClass: Class<T>) {
+class ModuleDelegate<T : BaseModule>(private val moduleClass: Class<T>) {
     private var moduleInstance: T? = null
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
@@ -13,4 +13,4 @@ class ModuleDelegate<T : Module>(private val moduleClass: Class<T>) {
     }
 }
 
-inline fun <reified T : Module> module() = ModuleDelegate(T::class.java)
+inline fun <reified T : BaseModule> module() = ModuleDelegate(T::class.java)
