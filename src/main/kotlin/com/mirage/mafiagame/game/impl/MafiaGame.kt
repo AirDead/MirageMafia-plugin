@@ -287,10 +287,6 @@ class MafiaGame(
             it.inventory.remove(Material.ENCHANTED_BOOK)
         }
 
-        if (maxVotes != null && votingMap.values.count { it == maxVotes } <= 1) {
-            checkGameEnd()
-        }
-
         votingMap.clear()
         skipVoters.clear()
         kickVoters.clear()

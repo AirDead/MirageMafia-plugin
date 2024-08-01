@@ -17,7 +17,10 @@ class ConfigService(app: JavaPlugin) : BaseModule(app) {
         config = MafiaConfig(
             chestLocations = mutableListOf(),
             gameLocation = gameLocation,
-            lobbyLocation = Location(Bukkit.getWorld("world"), 50.0, 65.0, 50.0)
+            lobbyLocation = Location(Bukkit.getWorld("world"), 50.0, 65.0, 50.0),
+            startMeetingLocation = Location(gameWorld, 203.0, 110.0, 4.0),
+            endMeetingLocation = Location(gameWorld, 203.0, 110.0, 12.0),
+            tasksLocations = mapOf()
         )
     }
 

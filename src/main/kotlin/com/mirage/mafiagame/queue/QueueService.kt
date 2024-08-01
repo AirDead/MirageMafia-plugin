@@ -17,7 +17,7 @@ class QueueService(app: JavaPlugin) : BaseModule(app) {
     private val queues = mutableMapOf<QueueType, QueueManager>()
 
     override fun onLoad() {
-        queues[QueueType.FIRST] = QueueManager { Queue(1) {
+        queues[QueueType.FIRST] = QueueManager { Queue(7) {
             MafiaGame(app, it.toBukkitPlayers().toMutableList()).start()
         } }
 
