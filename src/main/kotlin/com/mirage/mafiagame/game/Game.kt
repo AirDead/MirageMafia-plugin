@@ -15,6 +15,7 @@ interface Game {
     val plugin: JavaPlugin
     val players: MutableList<Player>
     val killedPlayers: MutableSet<Player>
+    var dayCount: Int
     val chestInventories: Map<Location, Inventory>
     val blockMap: ConcurrentHashMap<Location, Material>
     var brokenBlock: Int

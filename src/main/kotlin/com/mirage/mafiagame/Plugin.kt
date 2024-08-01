@@ -5,6 +5,7 @@ package com.mirage.mafiagame
 import com.github.retrooper.packetevents.PacketEvents
 import com.mirage.mafiagame.command.MafiaCommand
 import com.mirage.mafiagame.command.SudoCommand
+import com.mirage.mafiagame.config.ConfigService
 import com.mirage.mafiagame.game.listener.*
 import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.module.DIContainer
@@ -13,7 +14,6 @@ import com.mirage.mafiagame.nms.listener.BlockUpdateListener
 import com.mirage.mafiagame.queue.QueueService
 import com.mirage.mafiagame.role.RoleAssignService
 import com.mirage.mafiagame.task.TaskService
-import com.mirage.mafiagame.config.ConfigService
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -58,6 +58,7 @@ class Plugin : JavaPlugin() {
 
     inline fun loadModules() {
         modules.forEach {
+            logger.info("Loading module: ${it::class.simpleName}")
             it.onLoad()
             DIContainer.register(it::class.java, it)
             logger.info("Loaded module: ${it::class.simpleName}")
@@ -66,6 +67,7 @@ class Plugin : JavaPlugin() {
 
     inline fun unloadModules() {
         modules.forEach {
+            logger.info("Unloading module: ${it::class.simpleName}")
             it.onUnload()
             DIContainer.unregister(it::class.java)
             logger.info("Unloaded module: ${it::class.simpleName}")

@@ -1,78 +1,85 @@
-gameLocation:
-  world: world
-  x: 200.0
-  y: 70.0
-  z: 200.0
-
-lobbyLocation:
-  world: world
-  x: 50.0
-  y: 65.0
-  z: 50.0
-
 chests:
-  1:
-    world: world
+  - world: game
     x: 167.0
     y: 126.0
     z: 5.0
-  2:
-    world: world
+  - world: game
     x: 151.0
     y: 114.0
     z: 9.0
-  3:
-    world: world
+  - world: game
     x: 187.0
     y: 104.0
     z: 3.0
-  4:
-    world: world
+  - world: game
     x: 192.0
     y: 104.0
     z: 16.0
-  5:
-    world: world
+  - world: game
     x: 194.0
     y: 103.0
     z: 12.0
-  6:
-    world: world
+  - world: game
     x: 193.0
     y: 104.0
     z: 13.0
-  7:
-    world: world
+  - world: game
     x: 196.0
     y: 103.0
     z: 4.0
-  8:
-    world: world
+  - world: game
     x: 172.0
     y: 97.0
     z: 2.0
-  9:
-    world: world
+  - world: game
     x: 149.0
     y: 99.0
     z: 1.0
-  10:
-    world: world
+  - world: game
     x: 167.0
     y: 98.0
     z: 10.0
-  11:
-    world: world
+  - world: game
     x: 168.0
     y: 97.0
     z: 9.0
-  12:
-    world: world
+  - world: game
     x: 182.0
     y: 103.0
     z: -8.0
-  13:
-    world: world
+  - world: game
     x: 124.0
     y: 105.0
     z: 12.0
+
+gameLocation:
+  world: game
+  x: 167.0
+  y: 109.0
+  z: 7.0
+
+lobbyLocation:
+  world: lobby
+  x: 0
+  y: 70
+  z: 0
+
+startMeetingLocation:
+  world: game
+  x: 203.0
+  y: 110.0
+  z: 4.0
+
+endMeetingLocation:
+  world: game
+  x: 203.0
+  y: 110.0
+  z: 12.0
+
+tasksLocations:
+  - location:
+      world: game
+      x: 10.0
+      y: 65.0
+      z: 10.0
+    task: "SomeTask"

@@ -1,13 +1,14 @@
 package com.mirage.mafiagame.game.listener
 
+import com.mirage.mafiagame.config.ConfigService
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.gameMap
 import com.mirage.mafiagame.module.BaseModule
+import com.mirage.mafiagame.module.module
 import com.mirage.mafiagame.role.currentRole
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.Bukkit
-import org.bukkit.Location
+import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -18,7 +19,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class PlayerListener(app: JavaPlugin) : BaseModule(app), Listener {
-
+    val storageService by module<ConfigService>()
     override fun onLoad() {
         app.server.pluginManager.registerEvents(this, app)
     }
@@ -59,6 +60,8 @@ class PlayerListener(app: JavaPlugin) : BaseModule(app), Listener {
                 player.hidePlayer(app, it)
             }
         }
+
+        player.teleport(storageService.config.lobbyLocation)
     }
 
     @EventHandler
@@ -66,9 +69,8 @@ class PlayerListener(app: JavaPlugin) : BaseModule(app), Listener {
         val player = event.player
         val game = player.currentGame
 
-        player.teleport(Location(Bukkit.getWorld("world"), 157.0, 286.0, 127.0))
-        player.inventory.clear()
-        game?.killedPlayers?.add(player)
-        game?.checkGameEnd()
+        player.teleport(storageService.config.lobbyLocation)
+        game?.onMafiaKill(player)
+        player.gameMode = GameMode.SURVIVAL
     }
 }

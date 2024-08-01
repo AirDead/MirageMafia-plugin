@@ -6,7 +6,9 @@ import com.mirage.utils.manager.QueueManager
 import com.mirage.utils.models.Queue
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.configuration.file.FileConfiguration
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -14,10 +16,10 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class QueueService(app: JavaPlugin) : BaseModule(app) {
 
-    private val queues = mutableMapOf<QueueType, QueueManager>()
+    val queues = mutableMapOf<QueueType, QueueManager>()
 
     override fun onLoad() {
-        queues[QueueType.FIRST] = QueueManager { Queue(7) {
+        queues[QueueType.FIRST] = QueueManager { Queue(9) {
             MafiaGame(app, it.toBukkitPlayers().toMutableList()).start()
         } }
 
@@ -45,6 +47,29 @@ class QueueService(app: JavaPlugin) : BaseModule(app) {
 
 fun Player.toQueuePlayer() = com.mirage.utils.models.Player(name)
 fun List<com.mirage.utils.models.Player>.toBukkitPlayers() = mapNotNull { Bukkit.getPlayer(it.name) }
+
+fun loadLocations(config: FileConfiguration): List<Location> {
+    val locSection = config.getConfigurationSection("blocks")
+
+    val allLocations = mutableListOf<Location>()
+
+    locSection?.getKeys(false)?.forEach { key ->
+        val worldName = locSection.getString("$key.world")
+        val world = Bukkit.getWorld(worldName ?: "world")
+        val x = locSection.getDouble("$key.x")
+        val y = locSection.getDouble("$key.y")
+        val z = locSection.getDouble("$key.z")
+
+        if (world != null) {
+            val location = Location(world, x, y, z)
+            allLocations.add(location)
+        }
+    }
+
+    return allLocations
+}
+
+
 
 fun generateRandomInventory(): Inventory {
     val inventory = Bukkit.createInventory(null, 9, Component.text("Эй, что тут у нас..."))

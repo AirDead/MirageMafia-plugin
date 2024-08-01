@@ -6,6 +6,7 @@ import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
+import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.plugin.java.JavaPlugin
 
 class ChatListener(app: JavaPlugin) : BaseModule(app), Listener {
@@ -19,21 +20,29 @@ class ChatListener(app: JavaPlugin) : BaseModule(app), Listener {
     }
 
     @EventHandler
-    fun onPlayerChat(event: AsyncChatEvent) {
+    fun onPlayerChat(event: AsyncPlayerChatEvent) {
         val player = event.player
+        val message = event.message
+        val radius = 6.0
+
+        event.recipients.clear()
 
         if (player.currentGame != null) {
-            event.viewers().removeIf { true }
-
-            player.currentGame?.players?.forEach { gamePlayer ->
-                event.viewers().add(gamePlayer)
+            if (message.startsWith("!")) {
+                player.currentGame?.players?.forEach { gamePlayer ->
+                    event.recipients.add(gamePlayer)
+                }
+            } else {
+                player.world.players.forEach { onlinePlayer ->
+                    if (onlinePlayer.location.distance(player.location) <= radius) {
+                        event.recipients.add(onlinePlayer)
+                    }
+                }
             }
         } else {
-            event.viewers().removeIf { true }
-
             Bukkit.getOnlinePlayers().forEach { onlinePlayer ->
                 if (onlinePlayer.currentGame == null) {
-                    event.viewers().add(onlinePlayer)
+                    event.recipients.add(onlinePlayer)
                 }
             }
         }

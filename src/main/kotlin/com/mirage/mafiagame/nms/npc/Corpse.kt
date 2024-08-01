@@ -2,14 +2,12 @@ package com.mirage.mafiagame.nms.npc
 
 import com.mirage.packetapi.extensions.sendPackets
 import com.mojang.authlib.GameProfile
-import net.minecraft.ChatFormatting
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.entity.Pose
-import net.minecraft.world.scores.Team
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer
 import org.bukkit.entity.Player
 import java.util.*
@@ -24,15 +22,15 @@ object Corpse {
             setPos(x, y + 0.1, z)
         }
 
-        val team = serverPlayer.server.scoreboard.run {
-            getPlayerTeam("invisibleNPCs") ?: addPlayerTeam("invisibleNPCs").apply {
-                setColor(ChatFormatting.BLACK)
-                setNameTagVisibility(Team.Visibility.NEVER)
-                setCollisionRule(Team.CollisionRule.NEVER)
-            }
-        }
-
-        serverPlayer.server.scoreboard.addPlayerToTeam(npc.scoreboardName, team)
+//        val team = serverPlayer.server.scoreboard.run {
+//            getPlayerTeam("invisibleNPCs") ?: addPlayerTeam("invisibleNPCs").apply {
+//                setColor(ChatFormatting.BLACK)
+//                setNameTagVisibility(Team.Visibility.NEVER)
+//                setCollisionRule(Team.CollisionRule.NEVER)
+//            }
+//        }
+//
+//        serverPlayer.server.scoreboard.addPlayerToTeam(npc.scoreboardName, team)
 
         player.sendPackets(
             ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, npc),
@@ -44,11 +42,10 @@ object Corpse {
     }
 
     fun clearAllCorpses(player: Player) {
-        val serverPlayer = (player as CraftPlayer).handle
         corpsesMap.remove(player.uniqueId)?.forEach { npc ->
-            serverPlayer.server.scoreboard.getPlayerTeam("invisibleNPCs")?.let { team ->
-                serverPlayer.server.scoreboard.removePlayerFromTeam(npc.scoreboardName, team)
-            }
+//            serverPlayer.server.scoreboard.getPlayerTeam("invisibleNPCs")?.let { team ->
+//                serverPlayer.server.scoreboard.removePlayerFromTeam(npc.scoreboardName, team)
+//            }
             player.sendPackets(ClientboundRemoveEntitiesPacket(npc.id))
         }
     }

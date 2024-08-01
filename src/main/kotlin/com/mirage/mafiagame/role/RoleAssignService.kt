@@ -8,7 +8,7 @@ import org.bukkit.plugin.java.JavaPlugin
 
 class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
 
-    private lateinit var roles: MutableList<Role>
+    lateinit var roles: MutableList<Role>
 
     override fun onLoad() {
         roles = mutableListOf(
@@ -34,7 +34,7 @@ class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
         val assignedRoles = originalRoles.map { (player, role) ->
             if (mafiaPlayers.contains(player)) {
                 player to object : Role by role {
-                    override val name = "${role.name} (Мафия)"
+                    override val name = "${role.name} §c(Мафия)"
                     override var canBreak = true
                     override var canKill = true
 
@@ -50,7 +50,7 @@ class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
         assignedRoles.forEach { (player, role) ->
             player.currentRole = role
             player.inventory.addItem(*role.getInventory().toTypedArray())
-            player.sendMessage("Ваша роль: ${role.name}")
+            player.sendMessage("Ваша роль: §a${role.name}")
         }
     }
 

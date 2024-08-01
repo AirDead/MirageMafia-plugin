@@ -42,6 +42,7 @@ class MafiaGame(
     override val players: MutableList<Player>
 ) : Game {
     override val killedPlayers = mutableSetOf<Player>()
+    override var dayCount: Int = 0
     override val chestInventories = mutableMapOf<Location, Inventory>()
     override val lastKillTime = mutableMapOf<String, Long>()
     override val updatedLocations = mutableSetOf<Vector3i>()
@@ -52,13 +53,13 @@ class MafiaGame(
     override var timeRunnable: BukkitTask? = null
     override var nightSkipVotes = 0
     override var isNight = false
-    override val bossBar = BossBar.bossBar(Component.text("Иконка солнца"), 1.0f, Color.GREEN, Overlay.PROGRESS)
+    override val bossBar = BossBar.bossBar(Component.text("День | $dayCount/5", NamedTextColor.GREEN), 1.0f, Color.GREEN, Overlay.PROGRESS)
     override var isVoting = false
     override val votingMap = mutableMapOf<String, Int>()
     override val skipVoters = mutableSetOf<UUID>()
     override val kickVoters = mutableSetOf<UUID>()
 
-    val configService by module<ConfigService>()
+    val storageService by module<ConfigService>()
 
     override fun start() {
         val onlinePlayers = Bukkit.getOnlinePlayers()
@@ -66,7 +67,7 @@ class MafiaGame(
         assigner.assignRoles(players)
         players.forEach { player ->
             player.currentGame = this
-            player.teleport(configService.config.gameLocation)
+            player.teleport(storageService.config.gameLocation)
             bossBar.let { player.showBossBar(it) }
             onlinePlayers.forEach {
                 if (it !in players) {
@@ -76,10 +77,9 @@ class MafiaGame(
             }
         }
 
-        fillChestInventories(configService.config.chestLocations.shuffled().take(10))
+        fillChestInventories(storageService.config.chests.shuffled().take(10))
         startDayNightCycle()
     }
-
 
     override fun end(isMafiaWin: Boolean) {
         val onlinePlayers = Bukkit.getOnlinePlayers()
@@ -109,7 +109,7 @@ class MafiaGame(
             }
             it.currentGame = null
             it.currentRole = null
-            it.teleport(Location(Bukkit.getWorld("world"), 157.0, 286.0, 127.0))
+            it.teleport(storageService.config.lobbyLocation)
             it.playSound(it.location, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f)
             it.showTitle(title)
             it.hideBossBar(bossBar)
@@ -147,12 +147,17 @@ class MafiaGame(
         }
 
         killedPlayers.add(player)
+        player.inventory.clear()
         checkGameEnd()
     }
 
     override fun onBlockBreak(player: Player, block: Material, location: Location) {
         when (block) {
             Material.YELLOW_CONCRETE -> {
+                if (isVoting) {
+                    player.sendMessage(Component.text("Нельзя ломать блоки во время голосования", NamedTextColor.RED))
+                    return
+                }
                 if (sabotageRunnable != null) return
                 if (player.currentRole?.canBreak == false) return
                 val packet = ClientboundBlockUpdatePacket(location.toBlockPos(), Blocks.RED_CONCRETE.defaultBlockState())
@@ -229,6 +234,7 @@ class MafiaGame(
     }
 
     override fun startVoting(whoStarted: Player) {
+        if (isVoting) return
         if (sabotageRunnable != null) {
            whoStarted.sendMessage(Component.text("Нельзя начать голосование во время саботажа", NamedTextColor.RED))
             return
@@ -250,7 +256,9 @@ class MafiaGame(
         players.forEach { player ->
             player.showTitle(title)
             player.sendMessage(message)
-            player.inventory.addItem(item)
+            if (player !in killedPlayers) {
+                player.inventory.addItem(item)
+            }
         }
         isVoting = true
     }
@@ -324,7 +332,7 @@ class MafiaGame(
             Component.text("Ночь наступила!").color(NamedTextColor.BLUE),
             Component.text("Иконка ночи").color(NamedTextColor.RED)
         )
-        bossBar.name(Component.text("Иконка ночи"))
+        bossBar.name(Component.text("Ночь | $dayCount/5", NamedTextColor.RED))
         bossBar.color(Color.RED)
 
         players.forEach { player ->
@@ -345,8 +353,8 @@ class MafiaGame(
             Component.text("День наступил!").color(NamedTextColor.YELLOW),
             Component.text("Иконка солнца").color(NamedTextColor.GREEN)
         )
-
-        bossBar.name(Component.text("Иконка солнца"))
+        dayCount++
+        bossBar.name(Component.text("День | $dayCount/5", NamedTextColor.GREEN))
         bossBar.color(Color.GREEN)
 
         players.forEach { player ->
@@ -361,6 +369,10 @@ class MafiaGame(
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             startNight()
         }, 10 * 60 * 20)
+
+        if (dayCount == 5) {
+            end(false)
+        }
     }
 
     override fun onPlayerClickBed(player: Player, location: Location) {
