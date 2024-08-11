@@ -1,23 +1,22 @@
 package com.mirage.mafiagame.game.impl
 
 import com.github.retrooper.packetevents.util.Vector3i
+import com.mirage.mafiagame.VotingMenu
 import com.mirage.mafiagame.config.ConfigService
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.module.module
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.item.NamedItemStack
 import com.mirage.mafiagame.nms.npc.Corpse
 import com.mirage.mafiagame.queue.addPickaxesToInventories
 import com.mirage.mafiagame.queue.generateRandomInventory
-import com.mirage.mafiagame.role.RoleAssignService
+import com.mirage.mafiagame.role.RoleServiceImpl
 import com.mirage.mafiagame.role.currentRole
 import com.mirage.packetapi.extensions.craftPlayer
 import com.mirage.packetapi.extensions.sendPackets
+import dev.nikdekur.minelib.koin.MineLibKoinComponent
 import net.kyori.adventure.bossbar.BossBar
-import net.kyori.adventure.bossbar.BossBar.Color
-import net.kyori.adventure.bossbar.BossBar.Overlay
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.title.Title
@@ -33,6 +32,7 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
+import org.koin.core.component.inject
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -40,7 +40,10 @@ import java.util.concurrent.ConcurrentHashMap
 class MafiaGame(
     override val plugin: JavaPlugin,
     override val players: MutableList<Player>
-) : Game {
+) : Game, MineLibKoinComponent {
+    private val configService by inject<ConfigService>()
+    private val roleAssignService by inject<RoleServiceImpl>()
+
     override val killedPlayers = mutableSetOf<Player>()
     override val chestInventories = mutableMapOf<Location, Inventory>()
     override val lastKillTime = mutableMapOf<String, Long>()
@@ -50,25 +53,22 @@ class MafiaGame(
     override var brokenBlock = 0
     override var sabotageRunnable: BukkitTask? = null
     override var timeRunnable: BukkitTask? = null
-    override var nightSkipVotes = 0
+    override var sleepingPlayers = mutableSetOf<UUID>()
     override var isNight = false
-    override val bossBar = BossBar.bossBar(Component.text("Иконка солнца"), 1.0f, Color.GREEN, Overlay.PROGRESS)
+    override var dayCount = 0
+    override val bossBar = BossBar.bossBar(Component.text(configService.bossBarNameDay), 1.0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
     override var isVoting = false
     override val votingMap = mutableMapOf<String, Int>()
     override val skipVoters = mutableSetOf<UUID>()
     override val kickVoters = mutableSetOf<UUID>()
 
-    val configService by module<ConfigService>()
-
     override fun start() {
-        val onlinePlayers = Bukkit.getOnlinePlayers()
-        val assigner by module<RoleAssignService>()
-        assigner.assignRoles(players)
+        roleAssignService.assignRoles(players)
         players.forEach { player ->
             player.currentGame = this
-            player.teleport(configService.config.gameLocation)
+            player.teleport(configService.gameLocation)
             bossBar.let { player.showBossBar(it) }
-            onlinePlayers.forEach {
+            Bukkit.getOnlinePlayers().forEach {
                 if (it !in players) {
                     player.hidePlayer(plugin, it)
                     it.hidePlayer(plugin, player)
@@ -76,14 +76,11 @@ class MafiaGame(
             }
         }
 
-        fillChestInventories(configService.config.chestLocations.shuffled().take(10))
+        fillChestInventories(configService.chestLocations.shuffled().take(10))
         startDayNightCycle()
     }
 
-
     override fun end(isMafiaWin: Boolean) {
-        val onlinePlayers = Bukkit.getOnlinePlayers()
-
         val subInfo = if (isMafiaWin) {
             Component.text("Мафия победила", NamedTextColor.RED)
         } else {
@@ -95,11 +92,8 @@ class MafiaGame(
             Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
         )
         players.forEach {
-            onlinePlayers.forEach { player ->
-                if (it.currentGame == player.currentGame) {
-                    player.showPlayer(plugin, it)
-                    it.showPlayer(plugin, player)
-                } else if (player.currentGame == null) {
+            Bukkit.getOnlinePlayers().forEach { player ->
+                if (it.currentGame == player.currentGame || it.currentGame == null) {
                     player.showPlayer(plugin, it)
                     it.showPlayer(plugin, player)
                 } else {
@@ -159,7 +153,7 @@ class MafiaGame(
                 players.forEach { it.sendPackets(packet) }
                 updatedLocations.add(location.toVector3i())
                 blockMap[location] = Material.RED_CONCRETE
-                if (++brokenBlock == 5) onSabotageStart()
+                if (++brokenBlock == configService.blocksToBreak) onSabotageStart()
             }
 
             Material.RED_CONCRETE -> {
@@ -169,7 +163,7 @@ class MafiaGame(
                 val packet = ClientboundBlockUpdatePacket(location.toBlockPos(), Blocks.YELLOW_CONCRETE.defaultBlockState())
                 players.forEach {
                     it.sendPackets(packet)
-                    it.sendActionBar(Component.text("Блок восстановлен, осталось: ${brokenBlock - 1}/5", NamedTextColor.GREEN))
+                    it.sendActionBar(Component.text("${configService.blockRepairActionBar}${brokenBlock - 1}/${configService.blocksToBreak}", NamedTextColor.GREEN))
                 }
                 blockMap[location] = Material.YELLOW_CONCRETE
                 if (--brokenBlock == 0) {
@@ -178,14 +172,14 @@ class MafiaGame(
                 }
             }
 
-            else -> {}
+            else -> return
         }
     }
 
     override fun onSabotageStart() {
-        val message = Component.text("Саботаж начался", NamedTextColor.RED)
+        val message = Component.text(configService.sabotageStartMessage, NamedTextColor.RED)
         val title = Title.title(
-            Component.text("САБОТАЖ", NamedTextColor.RED),
+            Component.text("ПОЛОМКА", NamedTextColor.RED),
             Component.text("У ВАС ЕСТЬ 5 МИНУТ НА УСТРАНЕНИЕ", NamedTextColor.WHITE),
             Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
         )
@@ -196,7 +190,7 @@ class MafiaGame(
 
         sabotageRunnable = object : BukkitRunnable() {
             override fun run() = onSabotageEnd(false)
-        }.runTaskLater(plugin, 20 * 300)
+        }.runTaskLater(plugin, configService.sabotageDuration)
     }
 
     override fun onSabotageEnd(isRepaired: Boolean) {
@@ -206,14 +200,14 @@ class MafiaGame(
 
         val title = if (isRepaired) {
             Title.title(
-                Component.text("САБОТАЖ УСПЕШНО УСТРАНЁН", NamedTextColor.GREEN),
+                Component.text(configService.sabotageSuccessMessage, NamedTextColor.GREEN),
                 Component.empty(),
                 Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
             )
         } else {
             players.forEach {
                 it.playSound(it.location, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f)
-                it.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 20 * 2, 1))
+                it.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 20 * 2, 1, true, false))
             }
             end(true)
             return
@@ -221,31 +215,31 @@ class MafiaGame(
 
         players.forEach {
             it.showTitle(title)
-            it.sendMessage(Component.text("Саботаж устранён", NamedTextColor.GREEN))
+            it.sendMessage(Component.text("Поломка устранёна", NamedTextColor.GREEN))
         }
 
-        sabotageRunnable?.cancel()  // Added to ensure the task is canceled
+        sabotageRunnable?.cancel()
         sabotageRunnable = null
     }
 
     override fun startVoting(whoStarted: Player) {
         if (sabotageRunnable != null) {
-           whoStarted.sendMessage(Component.text("Нельзя начать голосование во время саботажа", NamedTextColor.RED))
+            whoStarted.sendMessage(Component.text("Нельзя начать собрание, так-как что-то сломано...", NamedTextColor.RED))
             return
         }
         if (isNight) {
-            whoStarted.sendMessage(Component.text("Нельзя начать голосование ночью", NamedTextColor.RED))
+            whoStarted.sendMessage(Component.text("Нельзя начать голосование ночью, весь экипаж устал...", NamedTextColor.RED))
             return
         }
 
-        val message = Component.text("Голосование началось", NamedTextColor.RED)
+        val message = Component.text(configService.votingTitleSub, NamedTextColor.RED)
         val title = Title.title(
-            Component.text("ГОЛОСОВАНИЕ", NamedTextColor.RED),
-            Component.text("Выберите кого вы хотите изгнать", NamedTextColor.WHITE),
+            Component.text(configService.votingTitleMain, NamedTextColor.RED),
+            Component.text(configService.votingTitleSub, NamedTextColor.WHITE),
             Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
         )
 
-        val item = NamedItemStack(Material.ENCHANTED_BOOK, "Голосование", false)
+        val item = NamedItemStack(Material.ENCHANTED_BOOK, configService.votingItemName, false)
 
         players.forEach { player ->
             player.showTitle(title)
@@ -263,20 +257,20 @@ class MafiaGame(
         val totalVotes = votingMap.values.sum() + skipVotes
 
         val (message, title) = when {
-            maxVotes == null || totalVotes == 0 -> "Голосование пропущено" to "Голосование пропущено"
-            skipVotes >= maxVotes -> "Голосование пропущено" to "Голосование пропущено"
-            votingMap.values.count { it == maxVotes } > 1 -> "Голосование не дало результата" to "Голосование не дало результата"
+            maxVotes == null || totalVotes == 0 -> configService.votingSkippedMessage to configService.votingSkippedMessage
+            skipVotes >= maxVotes -> configService.votingSkippedMessage to configService.votingSkippedMessage
+            votingMap.values.count { it == maxVotes } > 1 -> configService.votingNoResultMessage to configService.votingNoResultMessage
             else -> {
                 val name = votingMap.entries.first { it.value == maxVotes }.key
                 val player = Bukkit.getPlayer(name) ?: return
                 onMafiaKill(player)
-                "Игрок $name изгнан" to "Изгнан $name"
+                "${configService.votingExileMessage} $name" to "Прощяй $name"
             }
         }
 
         val finalMessage = Component.text(message, if (maxVotes == null) NamedTextColor.GREEN else NamedTextColor.RED)
         val finalTitle = Title.title(
-            Component.text("ГОЛОСОВАНИЕ", NamedTextColor.RED),
+            Component.text(configService.votingTitleMain, NamedTextColor.RED),
             Component.text(title, if (maxVotes == null) NamedTextColor.GREEN else NamedTextColor.RED),
             Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
         )
@@ -293,85 +287,84 @@ class MafiaGame(
 
         isVoting = false
     }
-    
+
     override fun openVotingMenu(player: Player) {
-        val inventory = Bukkit.createInventory(player, 36, "Голосование")
-
-        players.forEach {
-            if (killedPlayers.contains(it)) return@forEach
-
-            val item = NamedItemStack(Material.PLAYER_HEAD, it.name)
-            inventory.addItem(item)
-        }
-
-        val barrier = NamedItemStack(Material.BARRIER, "Пропустить")
-
-        inventory.addItem(barrier)
+        val alivePlayers = players.filter { !killedPlayers.contains(it) }
+        val inventory = VotingMenu(player, alivePlayers).inventory
 
         player.openInventory(inventory)
     }
 
+
     override fun startDayNightCycle() {
+        dayCount += 1
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             startNight()
-            }, 10 * 60 * 20) // 4 minutes
+        }, configService.dayDuration)
     }
 
     override fun startNight() {
-        nightSkipVotes = 0
         isNight = true
         val title = Title.title(
-            Component.text("Ночь наступила!").color(NamedTextColor.BLUE),
-            Component.text("Иконка ночи").color(NamedTextColor.RED)
+            Component.text(configService.nightTitleMain).color(NamedTextColor.BLUE),
+            Component.text(configService.bossBarNameNight).color(NamedTextColor.RED)
         )
-        bossBar.name(Component.text("Иконка ночи"))
-        bossBar.color(Color.RED)
+        bossBar.name(Component.text("$configService.bossBarNameNight | $dayCount "))
+        bossBar.color(BossBar.Color.RED)
 
         players.forEach { player ->
             player.showTitle(title)
-            player.sendMessage(Component.text("Ночь наступила", NamedTextColor.BLUE))
-            player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 20 * 4 * 60, 4))
+            player.sendMessage(Component.text(configService.nightTitleMain, NamedTextColor.BLUE))
+            player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, configService.nightDuration.toInt(), 4, true, false))
         }
 
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             endNight()
-        }, 4 * 60 * 20) // 4 minutes
+        }, configService.nightDuration)
     }
 
     override fun endNight() {
+        sleepingPlayers.clear()
         isNight = false
         fillChestInventories(chestInventories.keys.toList())
         val title = Title.title(
-            Component.text("День наступил!").color(NamedTextColor.YELLOW),
-            Component.text("Иконка солнца").color(NamedTextColor.GREEN)
+            Component.text(configService.dayTitleMain).color(NamedTextColor.YELLOW),
+            Component.text(configService.bossBarNameDay).color(NamedTextColor.GREEN)
         )
 
-        bossBar.name(Component.text("Иконка солнца"))
-        bossBar.color(Color.GREEN)
+        bossBar.name(Component.text(configService.bossBarNameDay))
+        bossBar.color(BossBar.Color.GREEN)
 
         players.forEach { player ->
-            player.addPotionEffect(PotionEffect(PotionEffectType.HUNGER, 5 * 60, 1))
+            player.addPotionEffect(PotionEffect(PotionEffectType.HUNGER, 5 * 60, 1, true, false))
             player.removePotionEffect(PotionEffectType.BLINDNESS)
             player.removePotionEffect(PotionEffectType.SLOW)
             player.showTitle(title)
-            player.sendMessage(Component.text("День наступил", NamedTextColor.YELLOW))
+            player.sendMessage(Component.text(configService.dayTitleMain, NamedTextColor.YELLOW))
             player.wakeup(false)
+        }
+
+        dayCount += 1
+
+        if (dayCount == 5) {
+            end(false)
+            return
         }
 
         timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             startNight()
-        }, 10 * 60 * 20)
+        }, configService.dayDuration)
     }
 
     override fun onPlayerClickBed(player: Player, location: Location) {
         if (!isNight) return
         val alive = players.size - killedPlayers.size
-        nightSkipVotes++
-        player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 20 * 4 * 60, 3))
+        skipVoters.add(player.uniqueId)
+        player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, configService.nightDuration.toInt(), 3, true, false))
         player.sleep(location, true)
 
         plugin.server.scheduler.runTaskLater(plugin, Runnable {
-            if (nightSkipVotes > alive / 2) {
+            if (sleepingPlayers.size > alive / 2) {
                 endNight()
             }
         }, 10)
@@ -384,17 +377,19 @@ class MafiaGame(
 
         if (mafiaPlayers.isEmpty()) {
             end(false)
-        }
-        else if(nonMafiaPlayers.isEmpty() || nonMafiaPlayers.size <= mafiaPlayers.size) {
+        } else if (nonMafiaPlayers.isEmpty() || nonMafiaPlayers.size <= mafiaPlayers.size) {
             end(true)
         }
     }
 
     fun fillChestInventories(locations: List<Location>) {
+        val inventories = mutableSetOf<Inventory>()
         locations.forEach { location ->
-            chestInventories[location] = generateRandomInventory().apply {
-                addPickaxesToInventories(listOf(this))
-            }
+            val inventory = generateRandomInventory()
+            chestInventories[location] = inventory
+            inventories.add(inventory)
         }
+
+        addPickaxesToInventories(inventories.toList())
     }
 }

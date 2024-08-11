@@ -1,7 +1,6 @@
 package com.mirage.mafiagame.nms.item
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
@@ -29,13 +28,6 @@ class NamedItemStack : ItemStack {
         val meta: ItemMeta? = itemMeta
         meta?.displayName(Component.text(name))
         itemMeta = meta
-    }
-
-    constructor(material: Material, amount: Int, name: String, nameColor: NamedTextColor, canBeTraded: Boolean) : super(material, amount) {
-        val meta: ItemMeta? = itemMeta
-        meta?.displayName(Component.text(name, nameColor))
-        itemMeta = meta
-        this.canBeTraded = canBeTraded
     }
 
     constructor(material: Material, name: String, canBeTraded: Boolean) : this(material, 1, name) {

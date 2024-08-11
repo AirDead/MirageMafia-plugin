@@ -2,21 +2,13 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.module.BaseModule
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.plugin.java.JavaPlugin
 
-class ChatListener(app: JavaPlugin) : BaseModule(app), Listener {
-
-    override fun onLoad() {
-        app.server.pluginManager.registerEvents(this, app)
-    }
-
-    override fun onUnload() {
-        AsyncChatEvent.getHandlerList().unregister(this)
-    }
+class ChatListener(app: ServerPlugin) : Listener, BaseModule(app) {
 
     @EventHandler
     fun onPlayerChat(event: AsyncChatEvent) {

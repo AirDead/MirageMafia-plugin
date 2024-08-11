@@ -3,28 +3,19 @@ package com.mirage.mafiagame.game.listener
 import com.mirage.mafiagame.config.ConfigService
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.module.BaseModule
-import com.mirage.mafiagame.module.module
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Material
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
-import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.plugin.java.JavaPlugin
+import org.koin.core.component.inject
 
-class InteractionListener(app: JavaPlugin) : BaseModule(app), Listener {
-    val storage by module<ConfigService>()
-    override fun onLoad() {
-        app.server.pluginManager.registerEvents(this, app)
-    }
+class InteractionListener(app: ServerPlugin) : Listener, BaseModule(app) {
 
-    override fun onUnload() {
-        PlayerInteractEvent.getHandlerList().unregister(this)
-        InventoryClickEvent.getHandlerList().unregister(this)
-    }
+    val storage by inject<ConfigService>()
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
@@ -59,45 +50,13 @@ class InteractionListener(app: JavaPlugin) : BaseModule(app), Listener {
                 game.onPlayerClickBed(player, clickedBlock.location)
             }
             Material.STONE_BUTTON -> {
-                val config = storage.config
                 val maxDistance = 3
-                if (config.startMeetingLocation.distance(player.location) <= maxDistance) {
+                if (storage.meetingStartLocation.distance(player.location) <= maxDistance) {
                     game.startVoting(player)
-                } else if (config.endMeetingLocation.distance(player.location) <= maxDistance) {
+                } else if (storage.meetingEndLocation.distance(player.location) <= maxDistance) {
                     game.endVoting()
                 }
             }
-            else -> {}
-        }
-    }
-
-    @EventHandler
-    fun onInventoryClick(event: InventoryClickEvent) {
-        val player = event.whoClicked as? Player ?: return
-        val inventory = event.clickedInventory ?: return
-
-        if (inventory.viewers.first().openInventory.title != "Голосование") return
-        event.isCancelled = true
-
-        val game = player.currentGame ?: return
-        val clickedItem = event.currentItem ?: return
-
-        when (clickedItem.type) {
-            Material.BARRIER -> {
-                if (game.skipVoters.add(player.uniqueId)) {
-                    player.inventory.remove(Material.ENCHANTED_BOOK)
-                    player.closeInventory()
-                }
-            }
-            Material.PLAYER_HEAD -> {
-                val target = clickedItem.itemMeta?.displayName ?: return
-                if (game.kickVoters.add(player.uniqueId)) {
-                    game.votingMap[target] = game.votingMap.getOrDefault(target, 0) + 1
-                    player.inventory.remove(Material.ENCHANTED_BOOK)
-                    player.closeInventory()
-                }
-            }
-
             else -> {}
         }
     }

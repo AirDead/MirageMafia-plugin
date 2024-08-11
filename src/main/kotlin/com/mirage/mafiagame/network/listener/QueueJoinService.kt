@@ -1,17 +1,18 @@
 package com.mirage.mafiagame.network.listener
 
 import com.mirage.mafiagame.module.BaseModule
-import com.mirage.mafiagame.module.module
+import com.mirage.mafiagame.network.NetUtil
 import com.mirage.mafiagame.queue.QueueService
 import com.mirage.mafiagame.queue.QueueType
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.messaging.PluginMessageListener
+import org.koin.core.component.inject
 import java.nio.ByteBuffer
 
-class QueueJoinService(app: JavaPlugin) : BaseModule(app), PluginMessageListener {
-    private val queueService: QueueService by module()
+class QueueJoinService(app: ServerPlugin) : BaseModule(app), PluginMessageListener{
+    val queueService by inject<QueueService>()
 
     override fun onLoad() {
         Bukkit.getMessenger().registerIncomingPluginChannel(app, "mafia:queue", this)
@@ -21,14 +22,13 @@ class QueueJoinService(app: JavaPlugin) : BaseModule(app), PluginMessageListener
         Bukkit.getMessenger().unregisterIncomingPluginChannel(app, "mafia:queue", this)
     }
 
-    override fun onPluginMessageReceived(channel: String, player: Player, message: ByteArray?) {
-        if (channel == "mafia:queue" && message != null) {
-            val queueTypeCode = ByteBuffer.wrap(message).int
-            val queueType = QueueType.entries.find { it.code == queueTypeCode }
+    override fun onPluginMessageReceived(channel: String, player: Player, message: ByteArray) {
+        val queueTypeCode = ByteBuffer.wrap(message)
+        val code = NetUtil.readInt(queueTypeCode)
+        val queueType = QueueType.entries.find { it.ordinal == code }
 
-            if (queueType != null) {
-                queueService.joinQueue(player, queueType)
-            }
+        if (queueType != null) {
+            queueService.joinQueue(player, queueType)
         }
     }
 }

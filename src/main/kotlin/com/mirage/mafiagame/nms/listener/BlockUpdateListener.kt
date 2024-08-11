@@ -5,33 +5,30 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract
 import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
-import com.github.retrooper.packetevents.protocol.player.User
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange
 import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.packetapi.extensions.sendPackets
+import dev.nikdekur.ndkore.module.Module
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
 import net.minecraft.world.level.block.Blocks
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 
-class BlockUpdateListener(app: JavaPlugin) : BaseModule(app) {
+class BlockUpdateListener(override val app: JavaPlugin) :
+    PacketListenerAbstract(PacketListenerPriority.NORMAL), Module<JavaPlugin> {
 
     override fun onLoad() {
-        PacketEvents.getAPI().eventManager.registerListener(BlockUpdatePacketListener)
+        PacketEvents.getAPI().eventManager.registerListener(this)
     }
 
     override fun onUnload() {
-        PacketEvents.getAPI().eventManager.unregisterListener(BlockUpdatePacketListener)
+        PacketEvents.getAPI().eventManager.unregisterListener(this)
     }
-}
 
-object BlockUpdatePacketListener : PacketListenerAbstract(PacketListenerPriority.NORMAL) {
     override fun onPacketSend(event: PacketSendEvent) {
         if (event.packetType == PacketType.Play.Server.BLOCK_CHANGE) {
-            val player = event.user.getBukkitPlayer()
+            val player = Bukkit.getPlayer(event.user.uuid)
             val packet = WrapperPlayServerBlockChange(event)
             player?.currentGame?.let { game ->
                 if (game.updatedLocations.contains(packet.blockPosition)) {
@@ -41,8 +38,4 @@ object BlockUpdatePacketListener : PacketListenerAbstract(PacketListenerPriority
             }
         }
     }
-}
-
-fun User.getBukkitPlayer(): Player? {
-    return Bukkit.getPlayer(this.profile.uuid)
 }

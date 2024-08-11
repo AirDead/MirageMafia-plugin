@@ -1,46 +1,41 @@
 package com.mirage.mafiagame.command
 
-import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.module.BaseModule
-import com.mirage.mafiagame.module.module
+import com.mirage.mafiagame.i18n.MafiaMsg
 import com.mirage.mafiagame.queue.QueueService
 import com.mirage.mafiagame.queue.QueueType
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
+import dev.nikdekur.minelib.command.CommandContext
+import dev.nikdekur.minelib.command.CommandTabContext
+import dev.nikdekur.minelib.command.ServiceServerCommand
+import dev.nikdekur.minelib.ext.sendLangMsg
+import dev.nikdekur.minelib.i18n.MSGHolder
+import org.koin.core.component.inject
 
-class MafiaCommand(app: JavaPlugin) : BaseModule(app), CommandExecutor {
-    val queueService: QueueService by module()
+class MafiaCommand : ServiceServerCommand() {
+    override val argsRequirement: Int = 0
+    override val isConsoleFriendly: Boolean = false
+    override val name: String = "mafia"
+    override val permission: String = "mafia.command.mafia"
+    override val usageMSG: MSGHolder = MafiaMsg.Command.MAFIA_USAGE
 
-    override fun onLoad() {
-        app.getCommand("mafia")?.setExecutor(this)
-    }
+    val queueService: QueueService by inject()
 
-    override fun onUnload() {
-        app.getCommand("mafia")?.setExecutor(null)
-    }
-
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<String>): Boolean {
-        if (sender !is Player) {
-            sender.sendMessage("This command can only be executed by a player.")
-            return true
+    override fun CommandContext.onCommand() {
+        when (getArg(0)) {
+            "join" -> {
+                queueService.joinQueue(player, QueueType.FIRST)
+                sender.sendLangMsg(MafiaMsg.Queue.JOIN)
+            }
+            "leave" -> {
+                queueService.leaveQueue(player, QueueType.FIRST)
+                sender.sendLangMsg(MafiaMsg.Queue.LEAVE)
+            }
         }
-
-        if (sender.currentGame == null) {
-            queueService.joinQueue(sender, QueueType.FIRST)
-            sender.sendMessage(
-                Component.text("Вы зашли в очередь").color(NamedTextColor.GREEN)
-            )
-        } else {
-            sender.sendMessage(
-                Component.text("Вы уже находитесь в игре").color(NamedTextColor.RED)
-            )
-        }
-
-        return true
     }
+
+
+    override fun CommandTabContext.onTabComplete(): MutableList<String> {
+        return mutableListOf("join", "leave")
+    }
+
+
 }

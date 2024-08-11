@@ -21,9 +21,10 @@ interface Game {
     var sabotageRunnable: BukkitTask?
     val updatedLocations: MutableSet<Vector3i>
     val completedTasks: MutableSet<Int>
-    var nightSkipVotes: Int
+    var sleepingPlayers: MutableSet<UUID>
     var timeRunnable: BukkitTask?
     var isNight: Boolean
+    var dayCount: Int
     val bossBar: BossBar
     val lastKillTime: MutableMap<String, Long>
     var isVoting: Boolean

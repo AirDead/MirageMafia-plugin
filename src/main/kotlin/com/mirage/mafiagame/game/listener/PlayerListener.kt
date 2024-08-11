@@ -4,6 +4,7 @@ import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.gameMap
 import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.role.currentRole
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
@@ -15,19 +16,8 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.plugin.java.JavaPlugin
 
-class PlayerListener(app: JavaPlugin) : BaseModule(app), Listener {
-
-    override fun onLoad() {
-        app.server.pluginManager.registerEvents(this, app)
-    }
-
-    override fun onUnload() {
-        EntityDamageByEntityEvent.getHandlerList().unregister(this)
-        PlayerJoinEvent.getHandlerList().unregister(this)
-        PlayerQuitEvent.getHandlerList().unregister(this)
-    }
+class PlayerListener(app: ServerPlugin) : Listener, BaseModule(app) {
 
     @EventHandler
     fun onPlayerAttackPlayer(event: EntityDamageByEntityEvent) {

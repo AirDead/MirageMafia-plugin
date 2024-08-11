@@ -1,20 +1,22 @@
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.mirage.mafiagame.queue
 
 import com.mirage.mafiagame.game.impl.MafiaGame
 import com.mirage.mafiagame.module.BaseModule
 import com.mirage.utils.manager.QueueManager
 import com.mirage.utils.models.Queue
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.java.JavaPlugin
 
-class QueueService(app: JavaPlugin) : BaseModule(app) {
+class QueueServiceImpl(app: ServerPlugin) : QueueService, BaseModule(app) {
 
-    private val queues = mutableMapOf<QueueType, QueueManager>()
+    val queues = hashMapOf<QueueType, QueueManager>()
 
     override fun onLoad() {
         queues[QueueType.FIRST] = QueueManager { Queue(7) {
@@ -34,17 +36,17 @@ class QueueService(app: JavaPlugin) : BaseModule(app) {
         queues.clear()
     }
 
-    fun joinQueue(player: Player, queueType: QueueType) {
+    override fun joinQueue(player: Player, queueType: QueueType) {
         queues[queueType]?.addPlayerToQueue(player.toQueuePlayer())
     }
 
-    fun removeQueue(player: Player, queueType: QueueType) {
+    override fun leaveQueue(player: Player, queueType: QueueType) {
         queues[queueType]?.removePlayerFromQueue(player.toQueuePlayer())
     }
 }
 
-fun Player.toQueuePlayer() = com.mirage.utils.models.Player(name)
-fun List<com.mirage.utils.models.Player>.toBukkitPlayers() = mapNotNull { Bukkit.getPlayer(it.name) }
+inline fun Player.toQueuePlayer() = com.mirage.utils.models.Player(name)
+inline fun List<com.mirage.utils.models.Player>.toBukkitPlayers() = mapNotNull { Bukkit.getPlayer(it.name) }
 
 fun generateRandomInventory(): Inventory {
     val inventory = Bukkit.createInventory(null, 9, Component.text("Эй, что тут у нас..."))
@@ -64,7 +66,7 @@ fun generateRandomInventory(): Inventory {
     return inventory
 }
 
-fun addPickaxesToInventories(inventories: Collection<Inventory>) {
+fun addPickaxesToInventories(inventories: List<Inventory>) {
     val pickaxeIndices = inventories.indices.shuffled().take(2)
     pickaxeIndices.forEach { index ->
         val pickaxe = ItemStack(Material.IRON_PICKAXE)

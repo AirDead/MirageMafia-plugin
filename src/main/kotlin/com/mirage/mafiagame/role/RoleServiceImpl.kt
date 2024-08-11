@@ -1,18 +1,18 @@
 package com.mirage.mafiagame.role
 
 import com.mirage.mafiagame.module.BaseModule
-import com.mirage.mafiagame.role.impl.*
+import com.mirage.mafiagame.role.impl.Captain
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.java.JavaPlugin
 
-class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
+class RoleServiceImpl(app: ServerPlugin) : BaseModule(app), RoleService {
 
     private lateinit var roles: MutableList<Role>
 
     override fun onLoad() {
         roles = mutableListOf(
-            Captain(), FirstMate(), ChiefMechanic(), JuniorMechanic(), Cook(), AssistantCook(), PrivateDetective()
+            Captain()
         )
     }
 
@@ -20,13 +20,13 @@ class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
         roles.clear()
     }
 
-    fun assignRoles(players: List<Player>) {
+    override fun assignRoles(players: List<Player>) {
         val mafiaCount = getMafiaCount(players.size)
         val shuffledPlayers = players.shuffled()
         val originalRoles = mutableMapOf<Player, Role>()
 
         shuffledPlayers.forEachIndexed { index, player ->
-            val role = if (index < roles.size) roles[index] else Sailor()
+            val role = if (index < roles.size) roles[index] else Captain()
             originalRoles[player] = role
         }
 
@@ -39,7 +39,7 @@ class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
                     override var canKill = true
 
                     override fun getInventory(): List<ItemStack> {
-                        return role.getInventory() + Mafia().getInventory()
+                        return role.getInventory() + Captain().getInventory()
                     }
                 }
             } else {
@@ -54,7 +54,7 @@ class RoleAssignService(app: JavaPlugin) : BaseModule(app) {
         }
     }
 
-    private fun getMafiaCount(playerCount: Int) = when {
+    override fun getMafiaCount(playerCount: Int) = when {
         playerCount >= 28 -> 5
         playerCount >= 24 -> 4
         playerCount >= 18 -> 3

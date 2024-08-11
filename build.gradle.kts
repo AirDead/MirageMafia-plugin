@@ -1,20 +1,27 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
-    kotlin("plugin.serialization") version "1.4.20"
-    id("io.papermc.paperweight.userdev") version "1.7.1"
+    alias(libs.plugins.kotlinJvm)
+    alias(libs.plugins.paperPlugin)
 }
 
 group = "com.mirage.mafiaplugin"
-version = "1.0"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://repo.nikdekur.tech/releases")
+    }
+    maven("https://repo.xenondevs.xyz/releases")
 }
 
 dependencies {
     paperweight.paperDevBundle("1.20.1-R0.1-SNAPSHOT")
     compileOnly(fileTree("./libs"))
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
+
+    compileOnly(libs.ndkore)
+    compileOnly(libs.koin)
+    compileOnly(libs.minelib)
+//    compileOnly("xyz.xenondevs.invui:invui-kotlin:1.34")
 }
 
 tasks.test {

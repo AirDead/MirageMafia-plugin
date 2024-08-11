@@ -1,33 +1,32 @@
 package com.mirage.mafiagame.command
 
-import com.mirage.mafiagame.module.BaseModule
-import org.bukkit.Bukkit
-import org.bukkit.command.Command
-import org.bukkit.command.CommandExecutor
-import org.bukkit.command.CommandSender
-import org.bukkit.plugin.java.JavaPlugin
+import com.mirage.mafiagame.i18n.MafiaMsg
+import dev.nikdekur.minelib.command.CommandContext
+import dev.nikdekur.minelib.command.CommandTabContext
+import dev.nikdekur.minelib.command.ServiceServerCommand
+import dev.nikdekur.minelib.i18n.MSGHolder
 
-class SudoCommand(app: JavaPlugin) : BaseModule(app), CommandExecutor {
+class SudoCommand : ServiceServerCommand() {
+    override val argsRequirement: Int = 2
+    override val isConsoleFriendly: Boolean = false
+    override val name: String = "sudo"
+    override val permission: String = "mafia.command.sudo"
+    override val usageMSG: MSGHolder = MafiaMsg.Command.SUDO_USAGE
 
-    override fun onLoad() {
-        app.getCommand("sudo")?.setExecutor(this)
+    override fun CommandContext.onCommand() {
+        val target = getOnlinePlayer(0)
+        val command = getArg(1)
+
+        target.performCommand(command)
+        sender.sendMessage("Command executed")
     }
 
-    override fun onUnload() {
-        app.getCommand("sudo")?.setExecutor(null)
+    override fun CommandTabContext.onTabComplete(): MutableList<String>? {
+        if (args.size == 1) {
+            return online()
+        }
+        return null
     }
 
-    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>?): Boolean {
-        if (!sender.isOp) return false
-        if (args == null || args.size < 2) return false
 
-        val name = args[0]
-        val cmd = args.drop(1).joinToString(" ")
-
-        val player = Bukkit.getPlayer(name) ?: return false
-
-        player.performCommand(cmd)
-
-        return true
-    }
 }

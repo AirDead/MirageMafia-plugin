@@ -2,23 +2,14 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.module.BaseModule
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.plugin.java.JavaPlugin
 
-class BlockListener(app: JavaPlugin) : BaseModule(app), Listener {
-
-    override fun onLoad() {
-        app.server.pluginManager.registerEvents(this, app)
-    }
-
-    override fun onUnload() {
-        BlockBreakEvent.getHandlerList().unregister(this)
-        BlockPlaceEvent.getHandlerList().unregister(this)
-    }
+class BlockListener(app: ServerPlugin) : BaseModule(app), Listener {
 
     @EventHandler
     fun onBlockBreak(event: BlockBreakEvent) {
