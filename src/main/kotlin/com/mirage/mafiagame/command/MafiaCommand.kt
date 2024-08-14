@@ -7,7 +7,7 @@ import dev.nikdekur.minelib.command.CommandContext
 import dev.nikdekur.minelib.command.CommandTabContext
 import dev.nikdekur.minelib.command.ServiceServerCommand
 import dev.nikdekur.minelib.ext.sendLangMsg
-import dev.nikdekur.minelib.i18n.MSGHolder
+import dev.nikdekur.minelib.i18n.msg.MSGHolder
 import org.koin.core.component.inject
 
 class MafiaCommand : ServiceServerCommand() {
@@ -20,7 +20,7 @@ class MafiaCommand : ServiceServerCommand() {
     val queueService: QueueService by inject()
 
     override fun CommandContext.onCommand() {
-        when (getArg(0)) {
+        when (getString()) {
             "join" -> {
                 queueService.joinQueue(player, QueueType.FIRST)
                 sender.sendLangMsg(MafiaMsg.Queue.JOIN)

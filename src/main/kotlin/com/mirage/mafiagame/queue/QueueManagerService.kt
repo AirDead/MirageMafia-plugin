@@ -2,10 +2,11 @@
 
 package com.mirage.mafiagame.queue
 
+import com.mirage.mafiagame.config.QueueConfig
 import com.mirage.mafiagame.game.impl.MafiaGame
-import com.mirage.mafiagame.module.BaseModule
 import com.mirage.utils.manager.QueueManager
 import com.mirage.utils.models.Queue
+import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
@@ -13,23 +14,24 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import kotlin.reflect.KClass
 
-class QueueServiceImpl(app: ServerPlugin) : QueueService, BaseModule(app) {
+class QueueManagerService(override val app: ServerPlugin) : QueueService, PluginService {
+    override val bindClass: KClass<*>
+        get() = QueueService::class
 
     val queues = hashMapOf<QueueType, QueueManager>()
 
     override fun onLoad() {
-        queues[QueueType.FIRST] = QueueManager { Queue(7) {
-            MafiaGame(app, it.toBukkitPlayers().toMutableList()).start()
-        } }
+        val config = app.loadConfig<QueueConfig>("queue")
 
-        queues[QueueType.SECOND] = QueueManager { Queue(15) {
-            MafiaGame(app, it.toBukkitPlayers().toMutableList()).start()
-        } }
-
-        queues[QueueType.THIRD] = QueueManager { Queue(5) {
-            MafiaGame(app, it.toBukkitPlayers().toMutableList()).start()
-        } }
+        config.queues.forEach { setting ->
+            queues[setting.type] = QueueManager {
+                Queue(setting.playerCount) {
+                    MafiaGame(app, it.convertToBukkitPlayers().toMutableList()).start()
+                }
+            }
+        }
     }
 
     override fun onUnload() {
@@ -37,16 +39,17 @@ class QueueServiceImpl(app: ServerPlugin) : QueueService, BaseModule(app) {
     }
 
     override fun joinQueue(player: Player, queueType: QueueType) {
-        queues[queueType]?.addPlayerToQueue(player.toQueuePlayer())
+        queues[queueType]?.addPlayerToQueue(player.convertToQueuePlayer())
     }
 
     override fun leaveQueue(player: Player, queueType: QueueType) {
-        queues[queueType]?.removePlayerFromQueue(player.toQueuePlayer())
+        queues[queueType]?.removePlayerFromQueue(player.convertToQueuePlayer())
     }
 }
 
-inline fun Player.toQueuePlayer() = com.mirage.utils.models.Player(name)
-inline fun List<com.mirage.utils.models.Player>.toBukkitPlayers() = mapNotNull { Bukkit.getPlayer(it.name) }
+inline fun Player.convertToQueuePlayer() = com.mirage.utils.models.Player(name)
+inline fun List<com.mirage.utils.models.Player>.convertToBukkitPlayers() = mapNotNull { Bukkit.getPlayer(it.name) }
+
 
 fun generateRandomInventory(): Inventory {
     val inventory = Bukkit.createInventory(null, 9, Component.text("Эй, что тут у нас..."))
@@ -64,12 +67,4 @@ fun generateRandomInventory(): Inventory {
     }
 
     return inventory
-}
-
-fun addPickaxesToInventories(inventories: List<Inventory>) {
-    val pickaxeIndices = inventories.indices.shuffled().take(2)
-    pickaxeIndices.forEach { index ->
-        val pickaxe = ItemStack(Material.IRON_PICKAXE)
-        inventories.elementAt(index).addItem(pickaxe)
-    }
 }

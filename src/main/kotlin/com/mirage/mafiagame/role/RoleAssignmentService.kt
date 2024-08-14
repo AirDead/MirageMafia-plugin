@@ -1,39 +1,44 @@
 package com.mirage.mafiagame.role
 
-import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.role.impl.Captain
+import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import kotlin.reflect.KClass
 
-class RoleServiceImpl(app: ServerPlugin) : BaseModule(app), RoleService {
+class RoleAssignmentService(override val app: ServerPlugin) : PluginService, RoleService {
+    override val bindClass: KClass<*>
+        get() = RoleService::class
 
-    private lateinit var roles: MutableList<Role>
+
+    lateinit var availableRoles: MutableList<Role>
 
     override fun onLoad() {
-        roles = mutableListOf(
+        availableRoles = mutableListOf(
             Captain()
         )
     }
 
     override fun onUnload() {
-        roles.clear()
+        availableRoles.clear()
     }
 
     override fun assignRoles(players: List<Player>) {
         val mafiaCount = getMafiaCount(players.size)
         val shuffledPlayers = players.shuffled()
-        val originalRoles = mutableMapOf<Player, Role>()
+        val assignedRolesMap = mutableMapOf<Player, Role>()
 
         shuffledPlayers.forEachIndexed { index, player ->
-            val role = if (index < roles.size) roles[index] else Captain()
-            originalRoles[player] = role
+            val role = if (index < availableRoles.size) availableRoles[index] else Captain()
+            assignedRolesMap[player] = role
         }
 
-        val mafiaPlayers = shuffledPlayers.shuffled().take(mafiaCount)
-        val assignedRoles = originalRoles.map { (player, role) ->
-            if (mafiaPlayers.contains(player)) {
-                player to object : Role by role {
+        val mafiaPlayers = shuffledPlayers.take(mafiaCount).toSet() // Ускорение за счет использования Set
+
+        assignedRolesMap.forEach { (player, role) ->
+            val finalRole = if (mafiaPlayers.contains(player)) {
+                object : Role by role {
                     override val name = "${role.name} (Мафия)"
                     override var canBreak = true
                     override var canKill = true
@@ -43,14 +48,12 @@ class RoleServiceImpl(app: ServerPlugin) : BaseModule(app), RoleService {
                     }
                 }
             } else {
-                player to role
+                role
             }
-        }
 
-        assignedRoles.forEach { (player, role) ->
-            player.currentRole = role
-            player.inventory.addItem(*role.getInventory().toTypedArray())
-            player.sendMessage("Ваша роль: ${role.name}")
+            player.currentRole = finalRole
+            player.inventory.addItem(*finalRole.getInventory().toTypedArray())
+            player.sendMessage("Ваша роль: ${finalRole.name}")
         }
     }
 

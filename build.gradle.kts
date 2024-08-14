@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.paperPlugin)
+    alias(libs.plugins.shadowJar)
+    alias(libs.plugins.serialization)
 }
 
 group = "com.mirage.mafiaplugin"
@@ -21,6 +23,7 @@ dependencies {
     compileOnly(libs.ndkore)
     compileOnly(libs.koin)
     compileOnly(libs.minelib)
+    compileOnly(libs.kotlinx.serialization)
 //    compileOnly("xyz.xenondevs.invui:invui-kotlin:1.34")
 }
 

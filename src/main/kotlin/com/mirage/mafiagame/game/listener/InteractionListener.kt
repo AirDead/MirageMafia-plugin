@@ -1,63 +1,61 @@
 package com.mirage.mafiagame.game.listener
 
-import com.mirage.mafiagame.config.ConfigService
+
+import com.mirage.mafiagame.ext.asText
+import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.module.BaseModule
+import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
-import org.koin.core.component.inject
 
-class InteractionListener(app: ServerPlugin) : Listener, BaseModule(app) {
-
-    val storage by inject<ConfigService>()
+class InteractionListener(override val app: ServerPlugin) : Listener, PluginService {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
         val game = player.currentGame ?: return
 
-        if (player.inventory.itemInMainHand.type == Material.ENCHANTED_BOOK) {
-            if (game.skipVoters.contains(player.uniqueId)) {
-                player.sendMessage("Вы уже проголосовали за скип")
-                return
-            }
-            if (game.kickVoters.contains(player.uniqueId)) {
-                player.sendMessage("Вы уже проголосовали за кик")
-                return
-            }
-            game.openVotingMenu(player)
-            return
+        when {
+            player.inventory.itemInMainHand.type == Material.ENCHANTED_BOOK -> handleEnchantedBookInteraction(player, game)
+            event.action == Action.RIGHT_CLICK_BLOCK -> handleBlockInteraction(event, player, game)
         }
+    }
 
-        val clickedBlock = event.clickedBlock ?: return
-        if (event.action != Action.RIGHT_CLICK_BLOCK) return
+    private fun handleEnchantedBookInteraction(player: org.bukkit.entity.Player, game: Game) {
+        when (player.uniqueId) {
+            in game.skipVoters -> player.sendMessage("Вы уже проголосовали за скип")
+            in game.kickVoters -> player.sendMessage("Вы уже проголосовали за кик")
+            else -> game.openVotingMenu(player)
+        }
+    }
+
+    private fun handleBlockInteraction(event: PlayerInteractEvent, player: org.bukkit.entity.Player, game: Game) {
+        val block = event.clickedBlock ?: return
 
         event.isCancelled = true
 
-        when (clickedBlock.type) {
+        when (block.type) {
             Material.CHEST, Material.TRAPPED_CHEST, Material.BARREL -> {
-                game.chestInventories[clickedBlock.location]?.let {
+                game.chestInventories[block.location]?.let {
                     player.openInventory(it)
-                } ?: player.sendActionBar(Component.text("Заперто...").color(TextColor.color(200, 43, 43)))
+                } ?: player.sendActionBar("Заперто...".asText(200, 43, 43))
             }
-            Material.RED_BED -> {
-                game.onPlayerClickBed(player, clickedBlock.location)
-            }
-            Material.STONE_BUTTON -> {
-                val maxDistance = 3
-                if (storage.meetingStartLocation.distance(player.location) <= maxDistance) {
-                    game.startVoting(player)
-                } else if (storage.meetingEndLocation.distance(player.location) <= maxDistance) {
-                    game.endVoting()
-                }
-            }
-            else -> {}
+            Material.RED_BED -> game.onPlayerClickBed(player, block.location)
+            Material.STONE_BUTTON -> handleButtonInteraction(player, game)
+            else -> return
+        }
+    }
+
+    private fun handleButtonInteraction(player: org.bukkit.entity.Player, game: Game) {
+        val maxDistance = 3.0
+        // TODO: Implement this
+        when {
+//            storage.meetingStartLocation.distance(player.location) <= maxDistance -> game.startVoting(player)
+//            storage.meetingEndLocation.distance(player.location) <= maxDistance -> game.endVoting()
         }
     }
 }

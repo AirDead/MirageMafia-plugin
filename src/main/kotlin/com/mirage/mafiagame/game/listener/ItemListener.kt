@@ -1,9 +1,9 @@
 package com.mirage.mafiagame.game.listener
 
-import com.mirage.mafiagame.module.BaseModule
+import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.nms.item.canBeTraded
+import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -12,8 +12,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 
-class ItemListener(app: ServerPlugin) : Listener, BaseModule(app) {
+class ItemListener(override val app: ServerPlugin) : Listener, PluginService {
 
     @EventHandler
     fun onDropItem(event: PlayerDropItemEvent) {
@@ -27,39 +28,38 @@ class ItemListener(app: ServerPlugin) : Listener, BaseModule(app) {
 
         if (event.hand != EquipmentSlot.HAND) return
 
-        if (target.isSneaking && !player.isSneaking) {
-            val targetItem = target.inventory.itemInMainHand
-
-            if (targetItem.type == Material.AIR) {
-                player.sendActionBar(Component.text("У игрока нет предмета в руке...").color(NamedTextColor.RED))
-                return
-            }
-
-            if (!targetItem.canBeTraded) {
-                player.sendActionBar(Component.text("Этот предмет нельзя выкрасть...").color(NamedTextColor.RED))
-                return
-            }
-
-            player.inventory.addItem(targetItem)
-            target.inventory.setItemInMainHand(null)
-            player.sendActionBar(Component.text("Вы успешно выкрали предмет...").color(NamedTextColor.GREEN))
-        } else if (player.isSneaking && target.isSneaking) {
-            val playerItem = player.inventory.itemInMainHand
-
-            if (playerItem.type == Material.AIR) {
-                player.sendActionBar(Component.text("У вас нет предмета в руке...").color(NamedTextColor.RED))
-                return
-            }
-
-            if (!playerItem.canBeTraded) {
-                player.sendActionBar(Component.text("Этот предмет нельзя передать...").color(NamedTextColor.RED))
-                return
-            }
-
-            target.inventory.addItem(playerItem)
-            player.inventory.setItemInMainHand(null)
-            player.sendActionBar(Component.text("Вы успешно передали предмет...").color(NamedTextColor.GREEN))
-            target.sendActionBar(Component.text("Вам передали предмет...").color(NamedTextColor.GREEN))
+        when {
+            target.isSneaking && !player.isSneaking -> handleItemInteraction(player, target, isStealing = true)
+            player.isSneaking && target.isSneaking -> handleItemInteraction(player, target, isStealing = false)
         }
+    }
+
+    private fun handleItemInteraction(player: Player, target: Player, isStealing: Boolean) {
+        val (source, destination) = if (isStealing) target to player else player to target
+        val itemInHand = source.inventory.itemInMainHand
+
+        if (!itemCanBeTraded(player, itemInHand, isStealing)) return
+
+        destination.inventory.addItem(itemInHand)
+        source.inventory.setItemInMainHand(null)
+
+        val successMessage = if (isStealing) "Вы успешно выкрали предмет..." else "Вы успешно передали предмет..."
+        player.sendActionBar(successMessage.asText(NamedTextColor.GREEN))
+
+        if (!isStealing) target.sendActionBar("Вам передали предмет...".asText(NamedTextColor.GREEN))
+    }
+
+    private fun itemCanBeTraded(player: Player, item: ItemStack, isStealing: Boolean): Boolean {
+        val action = if (isStealing) "выкрасть" else "передать"
+        val errorMessage = when {
+            item.type == Material.AIR -> "У вас нет предмета в руке..."
+            !item.canBeTraded -> "Вы не можете $action этот предмет..."
+            else -> null
+        }
+        errorMessage?.let {
+            player.sendActionBar(it.asText(NamedTextColor.RED))
+            return false
+        }
+        return true
     }
 }

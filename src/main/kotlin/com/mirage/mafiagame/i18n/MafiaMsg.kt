@@ -2,10 +2,13 @@
 
 package com.mirage.mafiagame.i18n
 
-import dev.nikdekur.minelib.i18n.MSGHolder
+import dev.nikdekur.minelib.i18n.msg.MSGHolder
+
 
 inline fun msg(id: String, defaultText: String) = object : MSGHolder {
     override val id: String = id
+    override val bundle: String
+        get() = TODO("Not yet implemented")
     override val defaultText: String = defaultText
 }
 

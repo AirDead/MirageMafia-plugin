@@ -1,28 +1,25 @@
 package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
-import com.mirage.mafiagame.module.BaseModule
+import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class ChatListener(app: ServerPlugin) : Listener, BaseModule(app) {
+class ChatListener(override val app: ServerPlugin) : Listener, PluginService {
 
     @EventHandler
     fun onPlayerChat(event: AsyncChatEvent) {
         val player = event.player
+        val game = player.currentGame
 
-        if (player.currentGame != null) {
-            event.viewers().removeIf { true }
+        event.viewers().clear()
 
-            player.currentGame?.players?.forEach { gamePlayer ->
-                event.viewers().add(gamePlayer)
-            }
+        if (game != null) {
+            event.viewers().addAll(game.players)
         } else {
-            event.viewers().removeIf { true }
-
             Bukkit.getOnlinePlayers().forEach { onlinePlayer ->
                 if (onlinePlayer.currentGame == null) {
                     event.viewers().add(onlinePlayer)

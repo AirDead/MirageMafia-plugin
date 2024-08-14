@@ -1,11 +1,11 @@
 package com.mirage.mafiagame.game.listener
 
+import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.gameMap
-import com.mirage.mafiagame.module.BaseModule
 import com.mirage.mafiagame.role.currentRole
+import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -17,48 +17,55 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-class PlayerListener(app: ServerPlugin) : Listener, BaseModule(app) {
+class PlayerListener(override val app: ServerPlugin) : Listener, PluginService {
 
     @EventHandler
     fun onPlayerAttackPlayer(event: EntityDamageByEntityEvent) {
-        event.isCancelled = true
-
         val attacker = event.damager as? Player ?: return
         val victim = event.entity as? Player ?: return
 
-        if (attacker.inventory.itemInMainHand.type == Material.GOLDEN_SWORD && attacker.currentRole?.canKill == true) {
-            val lastKill = attacker.currentGame?.lastKillTime?.get(attacker.name) ?: 0
+        event.isCancelled = true
+
+        val game = attacker.currentGame ?: return
+
+        if (canPlayerKill(attacker)) {
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastKill >= 60 * 1000) {
-                attacker.currentGame?.onMafiaKill(victim)
-                attacker.currentGame?.lastKillTime?.put(attacker.name, currentTime)
-                attacker.sendActionBar(Component.text("Вы убили игрока!", NamedTextColor.RED))
+            val lastKillTime = game.lastKillTime[attacker.name] ?: 0
+
+            if (currentTime - lastKillTime >= 60 * 1000) {
+                game.onMafiaKill(victim)
+                game.lastKillTime[attacker.name] = currentTime
+                attacker.sendActionBar("Вы убили игрока!".asText(NamedTextColor.RED))
             } else {
-                attacker.sendActionBar(Component.text("Вы устали, не стоит так часто напрягаться!", NamedTextColor.YELLOW))
+                attacker.sendActionBar("Вы устали, не стоит так часто напрягаться!".asText(NamedTextColor.YELLOW))
             }
         }
+    }
+
+    private fun canPlayerKill(player: Player): Boolean {
+        return player.inventory.itemInMainHand.type == Material.GOLDEN_SWORD && player.currentRole?.canKill == true
     }
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
+        hidePlayerFromAllGames(player)
+    }
 
-        gameMap.forEach { (_, game) ->
-            game.players.forEach {
-                it.hidePlayer(app, player)
-                player.hidePlayer(app, it)
-            }
+    private fun hidePlayerFromAllGames(player: Player) {
+        gameMap.values.forEach { game ->
+            game.players.forEach { it.hidePlayer(app, player); player.hidePlayer(app, it) }
         }
     }
 
     @EventHandler
     fun onPlayerLeave(event: PlayerQuitEvent) {
         val player = event.player
-        val game = player.currentGame
-
         player.teleport(Location(Bukkit.getWorld("world"), 157.0, 286.0, 127.0))
         player.inventory.clear()
-        game?.killedPlayers?.add(player)
-        game?.checkGameEnd()
+        player.currentGame?.let { game ->
+            game.killedPlayers.add(player)
+            game.checkGameEnd()
+        }
     }
 }

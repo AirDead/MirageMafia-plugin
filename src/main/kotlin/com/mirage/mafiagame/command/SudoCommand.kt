@@ -4,7 +4,7 @@ import com.mirage.mafiagame.i18n.MafiaMsg
 import dev.nikdekur.minelib.command.CommandContext
 import dev.nikdekur.minelib.command.CommandTabContext
 import dev.nikdekur.minelib.command.ServiceServerCommand
-import dev.nikdekur.minelib.i18n.MSGHolder
+import dev.nikdekur.minelib.i18n.msg.MSGHolder
 
 class SudoCommand : ServiceServerCommand() {
     override val argsRequirement: Int = 2
@@ -14,8 +14,8 @@ class SudoCommand : ServiceServerCommand() {
     override val usageMSG: MSGHolder = MafiaMsg.Command.SUDO_USAGE
 
     override fun CommandContext.onCommand() {
-        val target = getOnlinePlayer(0)
-        val command = getArg(1)
+        val target = getOnlinePlayer()
+        val command = getString()
 
         target.performCommand(command)
         sender.sendMessage("Command executed")
