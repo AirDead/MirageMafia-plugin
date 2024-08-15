@@ -6,7 +6,7 @@ import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.location.LocationService
-import com.mirage.mafiagame.location.LocationType
+import com.mirage.mafiagame.config.location.LocationType
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.item.NamedItemStack
@@ -66,9 +66,10 @@ class MafiaGame(
 
     override fun start() {
         roleAssignService.assignRoles(players)
-        val location = locationConfig.getLocation(LocationType.GAME)
+        val location = locationConfig.getLocation(LocationType.GAME) ?: return
         players.forEach { player ->
             player.currentGame = this
+            player.teleport(location)
             
             bossBar.let { player.showBossBar(it) }
             Bukkit.getOnlinePlayers().forEach {
@@ -103,7 +104,7 @@ class MafiaGame(
                 } else {
                     player.hidePlayer(plugin, it)
                     it.hidePlayer(plugin, player)
-                }
+                }   
             }
             it.currentGame = null
             it.currentRole = null

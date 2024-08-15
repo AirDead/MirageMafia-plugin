@@ -1,0 +1,24 @@
+locations:
+  - type: "SPAWN"
+    world: "world"
+    x: 50.0
+    y: 70.0
+    z: 50.0
+
+  - type: "GAME"
+    world: "game"
+    x: 200.5
+    y: 65.0
+    z: -150.3
+
+  - type: "START_VOTING"
+    world: "game"
+    x: 300.0
+    y: 64.0
+    z: 200.0
+
+  - type: "END_VOTING"
+    world: "game"
+    x: -100.0
+    y: 65.0
+    z: 50.0

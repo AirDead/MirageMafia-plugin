@@ -1,12 +1,13 @@
 package com.mirage.mafiagame.command
 
 import com.mirage.mafiagame.i18n.MafiaMsg
-import dev.nikdekur.minelib.command.CommandContext
-import dev.nikdekur.minelib.command.CommandTabContext
 import dev.nikdekur.minelib.command.ServiceServerCommand
+import dev.nikdekur.minelib.command.api.CommandContext
+import dev.nikdekur.minelib.command.api.CommandTabContext
 import dev.nikdekur.minelib.i18n.msg.MSGHolder
+import dev.nikdekur.minelib.plugin.ServerPlugin
 
-class SudoCommand : ServiceServerCommand() {
+class SudoCommand(override val app: ServerPlugin) : ServiceServerCommand() {
     override val argsRequirement: Int = 2
     override val isConsoleFriendly: Boolean = false
     override val name: String = "sudo"

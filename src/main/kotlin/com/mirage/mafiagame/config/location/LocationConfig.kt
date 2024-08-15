@@ -1,4 +1,4 @@
-package com.mirage.mafiagame.location
+package com.mirage.mafiagame.config.location
 
 import kotlinx.serialization.Serializable
 
@@ -13,7 +13,5 @@ data class LocationSetting(
     val world: String,
     val x: Double,
     val y: Double,
-    val z: Double,
-    val pitch: Float,
-    val yaw: Float
+    val z: Double
 )

@@ -2,8 +2,6 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.nms.item.canBeTraded
-import dev.nikdekur.minelib.PluginService
-import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -14,7 +12,7 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
-class ItemListener(override val app: ServerPlugin) : Listener, PluginService {
+class ItemListener : Listener {
 
     @EventHandler
     fun onDropItem(event: PlayerDropItemEvent) {

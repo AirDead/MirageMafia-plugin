@@ -4,7 +4,6 @@ import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.game.gameMap
 import com.mirage.mafiagame.role.currentRole
-import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
@@ -17,7 +16,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 
-class PlayerListener(override val app: ServerPlugin) : Listener, PluginService {
+class PlayerListener(val app: ServerPlugin) : Listener {
 
     @EventHandler
     fun onPlayerAttackPlayer(event: EntityDamageByEntityEvent) {

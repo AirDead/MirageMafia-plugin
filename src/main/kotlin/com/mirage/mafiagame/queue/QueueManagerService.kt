@@ -2,7 +2,7 @@
 
 package com.mirage.mafiagame.queue
 
-import com.mirage.mafiagame.config.QueueConfig
+import com.mirage.mafiagame.config.queue.QueueConfig
 import com.mirage.mafiagame.game.impl.MafiaGame
 import com.mirage.utils.manager.QueueManager
 import com.mirage.utils.models.Queue
@@ -20,30 +20,35 @@ class QueueManagerService(override val app: ServerPlugin) : QueueService, Plugin
     override val bindClass: KClass<*>
         get() = QueueService::class
 
-    val queues = hashMapOf<QueueType, QueueManager>()
+    val queueManagers: MutableMap<String, QueueManager> = mutableMapOf()
 
     override fun onLoad() {
         val config = app.loadConfig<QueueConfig>("queue")
 
         config.queues.forEach { setting ->
-            queues[setting.type] = QueueManager {
+            val queueManager = QueueManager {
                 Queue(setting.playerCount) {
                     MafiaGame(app, it.convertToBukkitPlayers().toMutableList()).start()
                 }
             }
+            queueManagers[setting.type] = queueManager
         }
     }
 
-    override fun onUnload() {
-        queues.clear()
+    override fun joinQueue(player: Player, queueType: String) {
+        queueManagers[queueType]?.addPlayerToQueue(player.convertToQueuePlayer())
     }
 
-    override fun joinQueue(player: Player, queueType: QueueType) {
-        queues[queueType]?.addPlayerToQueue(player.convertToQueuePlayer())
+    override fun leaveQueue(player: Player, queueType: String) {
+        queueManagers[queueType]?.removePlayerFromQueue(player.convertToQueuePlayer())
     }
 
-    override fun leaveQueue(player: Player, queueType: QueueType) {
-        queues[queueType]?.removePlayerFromQueue(player.convertToQueuePlayer())
+    override fun getAvailableQueues(): List<String> {
+        return queueManagers.keys.toList()
+    }
+
+    override fun isValidQueueType(queueType: String): Boolean {
+        return queueManagers.containsKey(queueType)
     }
 }
 

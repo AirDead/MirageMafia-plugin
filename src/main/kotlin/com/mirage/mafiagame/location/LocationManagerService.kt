@@ -1,5 +1,7 @@
 package com.mirage.mafiagame.location
 
+import com.mirage.mafiagame.config.location.LocationConfig
+import com.mirage.mafiagame.config.location.LocationType
 import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.Bukkit
@@ -10,7 +12,7 @@ import kotlin.reflect.KClass
 
 class LocationManagerService(override val app: ServerPlugin) : LocationService, PluginService {
     override val bindClass: KClass<*>
-        get() = LocationManagerService::class
+        get() = LocationService::class
 
     private val locations = hashMapOf<LocationType, Location>()
 
@@ -20,8 +22,7 @@ class LocationManagerService(override val app: ServerPlugin) : LocationService, 
         config.locations.forEach { setting ->
             val world: World? = Bukkit.getWorld(setting.world)
             if (world != null) {
-                val location = Location(world, setting.x, setting.y, setting.z, setting.yaw, setting.pitch)
-                locations[setting.type] = location
+                locations[setting.type] = Location(world, setting.x, setting.y, setting.z)
             } else {
                 app.logger.warning("World '${setting.world}' not found for location '${setting.type}'")
             }

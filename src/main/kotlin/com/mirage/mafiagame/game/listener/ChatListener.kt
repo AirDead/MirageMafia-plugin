@@ -1,14 +1,12 @@
 package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
-import dev.nikdekur.minelib.PluginService
-import dev.nikdekur.minelib.plugin.ServerPlugin
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 
-class ChatListener(override val app: ServerPlugin) : Listener, PluginService {
+class ChatListener : Listener {
 
     @EventHandler
     fun onPlayerChat(event: AsyncChatEvent) {

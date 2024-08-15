@@ -1,6 +1,5 @@
-package com.mirage.mafiagame.config
+package com.mirage.mafiagame.config.queue
 
-import com.mirage.mafiagame.queue.QueueType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,6 +9,6 @@ data class QueueConfig(
 
 @Serializable
 data class QueueSetting(
-    val type: QueueType,
+    val type: String,
     val playerCount: Int
 )

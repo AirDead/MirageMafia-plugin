@@ -1,42 +1,37 @@
-@file:Suppress("NOTHING_TO_INLINE")
-
 package com.mirage.mafiagame
 
 import com.github.retrooper.packetevents.PacketEvents
-import com.mirage.mafiagame.command.MafiaCommand
 import com.mirage.mafiagame.command.SudoCommand
 import com.mirage.mafiagame.game.listener.*
-import com.mirage.mafiagame.location.LocationManagerService
 import com.mirage.mafiagame.network.listener.QueueJoinListener
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
 import com.mirage.mafiagame.queue.QueueManagerService
-import com.mirage.mafiagame.role.RoleAssignmentService
-import com.mirage.mafiagame.task.PlayerTaskManager
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 
 class Plugin : ServerPlugin() {
+    override val components by lazy {
+        listOf(
+//            // Services
+            QueueManagerService(this),
+//            PlayerTaskManager(this),
+//            RoleAssignmentService(this),
+//            LocationManagerService(this),
+            BlockUpdateListener(this),
+////
+//            // Commands
+//            MafiaCommand(this),
+            SudoCommand(this),
 
-    override val components = listOf(
-        // Services
-        QueueManagerService(this),
-        PlayerTaskManager(this),
-        RoleAssignmentService(this),
-        LocationManagerService(this),
-
-        // Commands
-        MafiaCommand(),
-        SudoCommand(),
-
-        // Listeners
-        BlockListener(this),
-        BlockUpdateListener(this),
-        ChatListener(this),
-        InteractionListener(this),
-        ItemListener(this),
-        QueueJoinListener(this),
-        PlayerListener(this)
-    )
+            // Listeners
+            BlockListener(this),
+            ChatListener(),
+            InteractionListener(),
+            ItemListener(),
+            QueueJoinListener(),
+            PlayerListener(this)
+        )
+    }
 
     override fun whenLoad() {
         PacketEvents.setAPI(SpigotPacketEventsBuilder.build(this))

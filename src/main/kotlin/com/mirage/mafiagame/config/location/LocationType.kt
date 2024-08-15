@@ -1,4 +1,4 @@
-package com.mirage.mafiagame.location
+package com.mirage.mafiagame.config.location
 
 enum class LocationType {
     SPAWN,

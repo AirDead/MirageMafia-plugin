@@ -4,15 +4,13 @@ package com.mirage.mafiagame.game.listener
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
-import dev.nikdekur.minelib.PluginService
-import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 
-class InteractionListener(override val app: ServerPlugin) : Listener, PluginService {
+class InteractionListener : Listener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
