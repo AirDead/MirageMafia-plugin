@@ -1,34 +1,40 @@
 package com.mirage.mafiagame
 
 import com.github.retrooper.packetevents.PacketEvents
+import com.mirage.mafiagame.command.MafiaCommand
 import com.mirage.mafiagame.command.SudoCommand
-import com.mirage.mafiagame.game.listener.*
-import com.mirage.mafiagame.network.listener.QueueJoinListener
+import com.mirage.mafiagame.game.listener.BlockListener
+import com.mirage.mafiagame.game.listener.ChatListener
+import com.mirage.mafiagame.game.listener.InteractionListener
+import com.mirage.mafiagame.game.listener.ItemListener
+import com.mirage.mafiagame.game.listener.PlayerListener
+import com.mirage.mafiagame.location.LocationManagerService
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
 import com.mirage.mafiagame.queue.QueueManagerService
+import com.mirage.mafiagame.role.RoleAssignmentService
+import com.mirage.mafiagame.task.PlayerTaskManager
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import io.github.retrooper.packetevents.factory.spigot.SpigotPacketEventsBuilder
 
 class Plugin : ServerPlugin() {
     override val components by lazy {
         listOf(
-//            // Services
+            // Service
+            LocationManagerService(this),
             QueueManagerService(this),
-//            PlayerTaskManager(this),
-//            RoleAssignmentService(this),
-//            LocationManagerService(this),
+            RoleAssignmentService(this),
+            PlayerTaskManager(this),
             BlockUpdateListener(this),
-////
-//            // Commands
-//            MafiaCommand(this),
-            SudoCommand(this),
 
-            // Listeners
+            // Commands
+            SudoCommand(this),
+            MafiaCommand(this),
+
+            // Listener
             BlockListener(this),
             ChatListener(),
             InteractionListener(),
             ItemListener(),
-            QueueJoinListener(),
             PlayerListener(this)
         )
     }

@@ -23,6 +23,7 @@ class LocationManagerService(override val app: ServerPlugin) : LocationService, 
             val world: World? = Bukkit.getWorld(setting.world)
             if (world != null) {
                 locations[setting.type] = Location(world, setting.x, setting.y, setting.z)
+                app.logger.info("Loaded location '${setting.type}' in world '${setting.world}'")
             } else {
                 app.logger.warning("World '${setting.world}' not found for location '${setting.type}'")
             }

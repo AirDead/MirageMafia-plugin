@@ -2,11 +2,11 @@ package com.mirage.mafiagame.game.impl
 
 import com.github.retrooper.packetevents.util.Vector3i
 import com.mirage.mafiagame.VotingMenu
+import com.mirage.mafiagame.config.location.LocationType
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.location.LocationService
-import com.mirage.mafiagame.config.location.LocationType
 import com.mirage.mafiagame.nms.block.toBlockPos
 import com.mirage.mafiagame.nms.block.toVector3i
 import com.mirage.mafiagame.nms.item.NamedItemStack
@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 class MafiaGame(
     override val plugin: JavaPlugin,
-    override val players: MutableList<Player>
+    override val players: List<Player>
 ) : Game, MineLibKoinComponent {
     private val locationConfig by inject<LocationService>()
     private val roleAssignService by inject<RoleAssignmentService>()

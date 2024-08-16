@@ -11,13 +11,10 @@ class RoleAssignmentService(override val app: ServerPlugin) : PluginService, Rol
     override val bindClass: KClass<*>
         get() = RoleService::class
 
-
-    lateinit var availableRoles: MutableList<Role>
+    val availableRoles: MutableList<Role> = mutableListOf()
 
     override fun onLoad() {
-        availableRoles = mutableListOf(
-            Captain()
-        )
+        availableRoles.add(Captain())
     }
 
     override fun onUnload() {
@@ -34,7 +31,7 @@ class RoleAssignmentService(override val app: ServerPlugin) : PluginService, Rol
             assignedRolesMap[player] = role
         }
 
-        val mafiaPlayers = shuffledPlayers.take(mafiaCount).toSet() // Ускорение за счет использования Set
+        val mafiaPlayers = shuffledPlayers.take(mafiaCount)
 
         assignedRolesMap.forEach { (player, role) ->
             val finalRole = if (mafiaPlayers.contains(player)) {

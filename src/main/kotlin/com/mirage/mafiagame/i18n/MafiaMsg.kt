@@ -13,14 +13,20 @@ inline fun msg(id: String, defaultText: String) = object : MSGHolder {
 object MafiaMsg {
 
     object Queue {
-        val JOIN = msg("queue.join", "You joined the queue {queueType}")
-        val LEAVE = msg("queue.leave", "You left the queue {queueType}")
+        val JOIN = msg("queue.join", "You joined the queue {queue}")
+        val LEAVE = msg("queue.leave", "You left the queue {queue}")
         val AVAILABLE_QUEUES = msg("queue.available_queues", "Available queues: {queues}")
     }
 
     object Command {
-        val MAFIA_USAGE = msg("mafia.usage", "Usage: /mafia <join|leave> [queueType]")
-        val SUDO_USAGE = msg("sudo.usage", "Usage: /sudo <player> <command>")
+        object Mafia {
+            val JOIN_USAGE = msg("mafia.join.usage", "Usage: /mafia join [queueType]")
+            val LEAVE_USAGE = msg("mafia.leave.usage", "Usage: /mafia leave [queueType]")
+            val USAGE = msg("mafia.usage", "Usage: /mafia <join|leave>")
+        }
+        object Sudo {
+            val USAGE = msg("sudo.usage", "Usage: /sudo <player> <command>")
+        }
     }
 
     object Errors {

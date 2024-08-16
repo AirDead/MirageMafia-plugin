@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 interface Game {
     val plugin: JavaPlugin
-    val players: MutableList<Player>
+    val players: List<Player>
     val killedPlayers: MutableSet<Player>
     val chestInventories: Map<Location, Inventory>
     val blockMap: ConcurrentHashMap<Location, Material>

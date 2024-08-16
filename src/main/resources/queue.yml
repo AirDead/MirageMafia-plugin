@@ -1,0 +1,5 @@
+queues:
+  - name: "default"
+    playerCount: 10
+  - name: "default+"
+    playerCount: 12

@@ -1,7 +1,9 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.paperPlugin)
-//    alias(libs.plugins.shadowJar)
+    alias(libs.plugins.shadowJar)
     alias(libs.plugins.serialization)
 }
 
@@ -33,8 +35,17 @@ kotlin {
     jvmToolchain(17)
 }
 
-//tasks.withType<ShadowJar> {
-//    relocate("kotlin", "com.mirage.mafiagame.shadow.kotlin")
-//    relocate("kotlinx", "com.mirage.mafiagame.shadow.kotlinx")
+//tasks.withType<KotlinCompile> {
+//    compilerOptions {
+//        freeCompilerArgs.addAll("-Xno-param-assertions", "-Xno-call-assertions")
+//    }
 //}
 
+tasks.withType<ShadowJar> {
+    archiveClassifier.set("")
+    archiveBaseName.set("mafia")
+
+    minimize {
+        exclude("kotlin/**")
+    }
+}

@@ -4,14 +4,14 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LocationConfig(
-    val locations: List<LocationSetting>
+    val locations: List<LocationSetting> = listOf(LocationSetting())
 )
 
 @Serializable
 data class LocationSetting(
-    val type: LocationType,
-    val world: String,
-    val x: Double,
-    val y: Double,
-    val z: Double
+    val type: LocationType = LocationType.SPAWN,
+    val world: String = "world",
+    val x: Double = 0.0,
+    val y: Double = 0.0,
+    val z: Double = 0.0
 )

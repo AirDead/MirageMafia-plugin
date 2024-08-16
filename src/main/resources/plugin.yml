@@ -16,7 +16,6 @@ commands:
 libraries:
   - com.mirage:utils:1.0
   - com.mirage:packetapi:1.0
-  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.10
 
 depend:
   - packetevents

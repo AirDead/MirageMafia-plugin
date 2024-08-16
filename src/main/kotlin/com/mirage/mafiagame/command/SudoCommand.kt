@@ -12,7 +12,7 @@ class SudoCommand(override val app: ServerPlugin) : ServiceServerCommand() {
     override val isConsoleFriendly: Boolean = false
     override val name: String = "sudo"
     override val permission: String = "mafia.command.sudo"
-    override val usageMSG: MSGHolder = MafiaMsg.Command.SUDO_USAGE
+    override val usageMSG: MSGHolder = MafiaMsg.Command.Sudo.USAGE
 
     override fun CommandContext.onCommand() {
         val target = getOnlinePlayer()
