@@ -13,10 +13,6 @@ commands:
     usage: /<command> <player> <command>
     aliases: [su, s]
 
-libraries:
-  - com.mirage:utils:1.0
-  - com.mirage:packetapi:1.0
-
 depend:
   - packetevents
   - MineLib

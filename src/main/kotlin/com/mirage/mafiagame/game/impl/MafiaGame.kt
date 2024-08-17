@@ -4,6 +4,8 @@ import com.github.retrooper.packetevents.util.Vector3i
 import com.mirage.mafiagame.VotingMenu
 import com.mirage.mafiagame.config.location.LocationType
 import com.mirage.mafiagame.ext.asText
+import com.mirage.mafiagame.ext.craftPlayer
+import com.mirage.mafiagame.ext.sendPackets
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.location.LocationService
@@ -14,8 +16,6 @@ import com.mirage.mafiagame.nms.npc.Corpse
 import com.mirage.mafiagame.queue.generateRandomInventory
 import com.mirage.mafiagame.role.RoleAssignmentService
 import com.mirage.mafiagame.role.currentRole
-import com.mirage.packetapi.extensions.craftPlayer
-import com.mirage.packetapi.extensions.sendPackets
 import dev.nikdekur.minelib.koin.MineLibKoinComponent
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component

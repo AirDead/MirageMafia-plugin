@@ -4,7 +4,7 @@ import com.mirage.mafiagame.models.Party
 import com.mirage.mafiagame.models.Player
 import com.mirage.mafiagame.models.Queue
 
-open class SingleQueue(
+data class SingleQueue(
     val maxPlayers: Int,
     val processLogic: (List<Player>) -> Unit
 ) : Queue {

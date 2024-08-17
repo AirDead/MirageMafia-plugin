@@ -1,4 +1,6 @@
 queues:
+  - name: "test"
+    playerCount: 1
   - name: "default"
     playerCount: 10
   - name: "default+"

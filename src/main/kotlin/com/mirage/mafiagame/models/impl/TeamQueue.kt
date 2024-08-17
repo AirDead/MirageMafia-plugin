@@ -4,7 +4,7 @@ import com.mirage.mafiagame.models.Party
 import com.mirage.mafiagame.models.Player
 import com.mirage.mafiagame.models.Queue
 
-class TeamQueue(
+data class TeamQueue(
     val maxTeams: Int,
     val maxPlayersPerTeam: Int,
     val processLogic: (List<List<Player>>) -> Unit

@@ -1,6 +1,6 @@
 package com.mirage.mafiagame.nms.npc
 
-import com.mirage.packetapi.extensions.sendPackets
+import com.mirage.mafiagame.ext.sendPackets
 import com.mojang.authlib.GameProfile
 import net.minecraft.ChatFormatting
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket

@@ -3,13 +3,11 @@ package com.mirage.mafiagame.command
 import com.mirage.mafiagame.command.mafia.MafiaJoinCommand
 import com.mirage.mafiagame.command.mafia.MafiaLeaveCommand
 import com.mirage.mafiagame.i18n.MafiaMsg
-import com.mirage.mafiagame.queue.QueueService
 import dev.nikdekur.minelib.command.ServiceServerRootCommand
 import dev.nikdekur.minelib.command.api.CommandContext
 import dev.nikdekur.minelib.command.api.CommandTabContext
 import dev.nikdekur.minelib.i18n.msg.MSGHolder
 import dev.nikdekur.minelib.plugin.ServerPlugin
-import org.koin.core.component.inject
 import java.util.LinkedList
 
 class MafiaCommand(override val app: ServerPlugin) : ServiceServerRootCommand() {
@@ -18,8 +16,6 @@ class MafiaCommand(override val app: ServerPlugin) : ServiceServerRootCommand() 
     override val name: String = "mafia"
     override val permission: String = "mafia.command.mafia"
     override val usageMSG: MSGHolder = MafiaMsg.Command.Mafia.USAGE
-
-    val queueService by inject<QueueService>()
 
     init {
         addSubCommand(MafiaJoinCommand(app))

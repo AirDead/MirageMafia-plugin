@@ -6,21 +6,20 @@ import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.World
 import org.bukkit.entity.Player
 import kotlin.reflect.KClass
 
 class LocationManagerService(override val app: ServerPlugin) : LocationService, PluginService {
-    override val bindClass: KClass<*>
-        get() = LocationService::class
+    override val bindClass: KClass<*> get() = LocationService::class
 
     private val locations = hashMapOf<LocationType, Location>()
 
     override fun onLoad() {
+        app.logger.info("Loading locations...")
         val config = app.loadConfig<LocationConfig>("locations")
 
         config.locations.forEach { setting ->
-            val world: World? = Bukkit.getWorld(setting.world)
+            val world = Bukkit.getWorld(setting.world)
             if (world != null) {
                 locations[setting.type] = Location(world, setting.x, setting.y, setting.z)
                 app.logger.info("Loaded location '${setting.type}' in world '${setting.world}'")
@@ -34,17 +33,11 @@ class LocationManagerService(override val app: ServerPlugin) : LocationService, 
         locations.clear()
     }
 
-    override fun getLocation(type: LocationType): Location? {
-        return locations[type]
-    }
+    override fun getLocation(type: LocationType): Location? = locations[type]
 
     override fun teleportPlayerToLocation(player: Player, type: LocationType): Boolean {
-        val location = getLocation(type)
-        return if (location != null) {
-            player.teleport(location)
-            true
-        } else {
-            false
-        }
+        val location = getLocation(type) ?: return false
+        player.teleport(location)
+        return true
     }
 }

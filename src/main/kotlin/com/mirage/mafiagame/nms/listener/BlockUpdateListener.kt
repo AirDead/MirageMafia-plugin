@@ -6,9 +6,9 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange
+import com.mirage.mafiagame.ext.sendPackets
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.nms.block.toBlockPos
-import com.mirage.packetapi.extensions.sendPackets
 import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
