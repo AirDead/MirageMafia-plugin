@@ -142,7 +142,7 @@ class MafiaGame(
                     )
                 )
             )
-            Corpse.spawnCorpse(it, "gosha", UUID.randomUUID(), location.x, location.y, location.z)
+            Corpse.spawnCorpse(it, "gohik", UUID.randomUUID(), location.x, location.y, location.z)
         }
 
         killedPlayers.add(player)
