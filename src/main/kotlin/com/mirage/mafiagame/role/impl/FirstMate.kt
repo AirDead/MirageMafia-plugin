@@ -1,11 +1,13 @@
 package com.mirage.mafiagame.role.impl
 
+import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.nms.item.NamedItemStack
 import com.mirage.mafiagame.role.Role
 import org.bukkit.Material
 
 class FirstMate : Role {
-    override val name = "Старпом"
+    override val name = "Старпом".asText()
+
     override val canRepair = true
     override val canBreak = false
     override val canKill = false

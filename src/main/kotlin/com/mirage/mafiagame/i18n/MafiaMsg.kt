@@ -2,12 +2,14 @@
 
 package com.mirage.mafiagame.i18n
 
-import dev.nikdekur.minelib.i18n.msg.MSGHolder
+import dev.nikdekur.minelib.i18n.msg.I18nMessage
+import dev.nikdekur.minelib.i18n.msg.MessageReference
 
-inline fun msg(id: String, defaultText: String) = object : MSGHolder {
-    override val id: String = id
-    override val bundle: String = "mafia"
-    override val defaultText: String = defaultText
+inline fun msg(id: String, defaultText: String) = MafiaMessage(id, defaultText)
+
+class MafiaMessage(override val id: String, override val defaultText: String) : I18nMessage, MessageReference {
+    override val bundleId: String = "mafia"
+    override val msg: I18nMessage = this
 }
 
 object MafiaMsg {

@@ -1,8 +1,18 @@
 package com.mirage.mafiagame.role
 
+import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.role.impl.Captain
+import com.mirage.mafiagame.role.impl.CoCock
+import com.mirage.mafiagame.role.impl.Cock
+import com.mirage.mafiagame.role.impl.Detective
+import com.mirage.mafiagame.role.impl.FirstMate
+import com.mirage.mafiagame.role.impl.JuniorMechanic
+import com.mirage.mafiagame.role.impl.Mafia
+import com.mirage.mafiagame.role.impl.Sailor
+import com.mirage.mafiagame.role.impl.SeniorMechanic
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import dev.nikdekur.ndkore.service.Service
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import kotlin.reflect.KClass
@@ -14,7 +24,7 @@ class RoleAssignmentService(override val app: ServerPlugin) : RoleService {
     val availableRoles: MutableList<Role> = mutableListOf()
 
     override fun onLoad() {
-        availableRoles.add(Captain())
+        availableRoles.addAll(listOf(Captain(), FirstMate(), Detective(), SeniorMechanic(), JuniorMechanic(), Cock(), CoCock()))
     }
 
     override fun onUnload() {
@@ -27,7 +37,7 @@ class RoleAssignmentService(override val app: ServerPlugin) : RoleService {
         val assignedRolesMap = mutableMapOf<Player, Role>()
 
         shuffledPlayers.forEachIndexed { index, player ->
-            val role = if (index < availableRoles.size) availableRoles[index] else Captain()
+            val role = if (index < availableRoles.size) availableRoles[index] else Sailor()
             assignedRolesMap[player] = role
         }
 
@@ -36,21 +46,25 @@ class RoleAssignmentService(override val app: ServerPlugin) : RoleService {
         assignedRolesMap.forEach { (player, role) ->
             val finalRole = if (mafiaPlayers.contains(player)) {
                 object : Role by role {
-                    override val name = "${role.name} (Мафия)"
+                    override val name = role.name.color(NamedTextColor.GREEN)
+                        .append(" (Мафия)".asText(NamedTextColor.RED))
                     override var canBreak = true
                     override var canKill = true
 
                     override fun getInventory(): List<ItemStack> {
-                        return role.getInventory() + Captain().getInventory()
+                        return role.getInventory() + Mafia().getInventory()
                     }
                 }
             } else {
-                role
+                object : Role by role {
+                    override val name = role.name
+                }
             }
 
             player.currentRole = finalRole
             player.inventory.addItem(*finalRole.getInventory().toTypedArray())
-            player.sendMessage("Ваша роль: ${finalRole.name}")
+            player.sendMessage("Ваша роль:")
+            player.sendMessage(finalRole.name)
         }
     }
 

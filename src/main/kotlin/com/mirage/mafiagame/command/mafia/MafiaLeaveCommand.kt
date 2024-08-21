@@ -6,17 +6,15 @@ import dev.nikdekur.minelib.command.ServiceServerCommand
 import dev.nikdekur.minelib.command.api.CommandContext
 import dev.nikdekur.minelib.command.api.CommandTabContext
 import dev.nikdekur.minelib.ext.sendLangMsg
-import dev.nikdekur.minelib.i18n.msg.MSGHolder
 import dev.nikdekur.minelib.plugin.ServerPlugin
 import dev.nikdekur.ndkore.service.inject
-import kotlin.getValue
 
 class MafiaLeaveCommand(override val app: ServerPlugin): ServiceServerCommand() {
-    override val isConsoleFriendly: Boolean = false
-    override val name: String = "leave"
-    override val permission: String = "mafia.command.leave"
-    override val argsRequirement: Int = 1
-    override val usageMSG: MSGHolder = MafiaMsg.Command.Mafia.LEAVE_USAGE
+    override val isConsoleFriendly = false
+    override val name = "leave"
+    override val permission = "mafia.command.leave"
+    override val argsRequirement = 1
+    override val usageMSG = MafiaMsg.Command.Mafia.LEAVE_USAGE
 
     val queueService by inject<QueueService>()
 
@@ -33,7 +31,11 @@ class MafiaLeaveCommand(override val app: ServerPlugin): ServiceServerCommand() 
         sender.sendLangMsg(MafiaMsg.Queue.LEAVE, "queue" to queueType)
     }
 
-    override fun CommandTabContext.onTabComplete(): MutableList<String> {
-        return queueService.getAvailableQueues().toMutableList()
+    override fun CommandTabContext.onTabComplete(): MutableList<String>? {
+        return if (args.size == 1) {
+            queueService.getAvailableQueues().toMutableList()
+        } else {
+            null
+        }
     }
 }

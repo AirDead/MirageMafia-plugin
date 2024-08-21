@@ -8,9 +8,9 @@ import com.mirage.mafiagame.game.listener.ChatListener
 import com.mirage.mafiagame.game.listener.InteractionListener
 import com.mirage.mafiagame.game.listener.ItemListener
 import com.mirage.mafiagame.game.listener.PlayerListener
-import com.mirage.mafiagame.location.LocationManagerService
+import com.mirage.mafiagame.location.ConfigLocationService
 import com.mirage.mafiagame.nms.listener.BlockUpdateListener
-import com.mirage.mafiagame.queue.QueueManagerService
+import com.mirage.mafiagame.queue.ConfigQueueService
 import com.mirage.mafiagame.role.RoleAssignmentService
 import com.mirage.mafiagame.task.PlayerTaskManager
 import dev.nikdekur.minelib.plugin.ServerPlugin
@@ -20,8 +20,8 @@ class Plugin : ServerPlugin() {
     override val components by lazy {
         listOf(
             // Service
-            LocationManagerService(this),
-            QueueManagerService(this),
+            ConfigLocationService(this),
+            ConfigQueueService(this),
             RoleAssignmentService(this),
             PlayerTaskManager(this),
             BlockUpdateListener(this),

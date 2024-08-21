@@ -1,7 +1,7 @@
 queues:
   - name: "test"
     playerCount: 1
-  - name: "default"
-    playerCount: 10
-  - name: "default+"
-    playerCount: 12
+  - name: "test2"
+    playerCount: 2
+  - name: "test3"
+    playerCount: 3

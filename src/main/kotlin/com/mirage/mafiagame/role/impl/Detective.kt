@@ -1,11 +1,13 @@
 package com.mirage.mafiagame.role.impl
 
+import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.nms.item.NamedItemStack
 import com.mirage.mafiagame.role.Role
 import org.bukkit.Material
 
 class Detective : Role {
-    override val name = "Детектив"
+    override val name = "Детектив".asText()
+
     override val canRepair = false
     override val canBreak = false
     override val canKill = false

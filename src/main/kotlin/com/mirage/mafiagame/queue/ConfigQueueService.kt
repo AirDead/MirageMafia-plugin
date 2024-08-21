@@ -15,7 +15,7 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import kotlin.reflect.KClass
 
-class QueueManagerService(override val app: ServerPlugin) : QueueService {
+class ConfigQueueService(override val app: ServerPlugin) : QueueService {
     override val bindClass: KClass<out Service<*>> get() = QueueService::class
 
     private val queueManagers = mutableMapOf<String, QueueManager>()

@@ -1,11 +1,11 @@
 package com.mirage.mafiagame.game.impl
 
 import com.github.retrooper.packetevents.util.Vector3i
-import com.mirage.mafiagame.VotingMenu
 import com.mirage.mafiagame.config.location.LocationType
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.ext.craftPlayer
 import com.mirage.mafiagame.ext.sendPackets
+import com.mirage.mafiagame.ext.toInventorySize
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.location.LocationService
@@ -66,7 +66,7 @@ class MafiaGame(
 
     override fun start() {
         roleAssignService.assignRoles(players)
-        val location = locationConfig.getLocation(LocationType.GAME) ?: return
+        val location = locationConfig.getLocation(LocationType.GAME) ?: error("Game location not found")
         players.forEach { player ->
             player.currentGame = this
             player.teleport(location)
@@ -146,6 +146,7 @@ class MafiaGame(
         }
 
         killedPlayers.add(player)
+        player.inventory.clear()
         checkGameEnd()
     }
 
@@ -261,22 +262,31 @@ class MafiaGame(
         val skipVotes = skipVoters.size
         val totalVotes = votingMap.values.sum() + skipVotes
 
-        val (message, title) = when {
-            maxVotes == null || totalVotes == 0 -> "Голосование пропущено" to "Голосование пропущено"
-            skipVotes >= maxVotes -> "Голосование пропущено" to "Голосование пропущено"
-            votingMap.values.count { it == maxVotes } > 1 -> "Голосование не дало результата" to "Голосование не дало результата"
+        val result = when {
+            maxVotes == null || totalVotes == 0 || skipVotes >= maxVotes ->
+                "Голосование пропущено" to NamedTextColor.GREEN
+            votingMap.values.count { it == maxVotes } > 1 ->
+                "Голосование не дало результата" to NamedTextColor.RED
             else -> {
                 val name = votingMap.entries.first { it.value == maxVotes }.key
-                val player = Bukkit.getPlayer(name) ?: return
-                onMafiaKill(player)
-                "Был изгнан игрок с именем: $name" to "Прощяй $name"
+                val player = Bukkit.getPlayerExact(name)
+
+                if (player == null || !player.isOnline) {
+                    "Игрок $name покинул игру, решил выйти самостоятельно" to NamedTextColor.YELLOW
+                } else {
+                    onMafiaKill(player)
+                    "Был изгнан игрок с именем: $name" to NamedTextColor.RED
+                }
             }
         }
 
-        val finalMessage = Component.text(message, if (maxVotes == null) NamedTextColor.GREEN else NamedTextColor.RED)
+        val (message, color) = result
+        val title = if (message.contains("изгнан")) "Прощай $message" else message
+
+        val finalMessage = Component.text(message, color)
         val finalTitle = Title.title(
             "ГОЛОСОВАНИЕ".asText(NamedTextColor.GREEN),
-            Component.text(title, if (maxVotes == null) NamedTextColor.GREEN else NamedTextColor.RED),
+            Component.text(title, color),
             Title.Times.times(Duration.ofMillis(250), Duration.ofMillis(1400), Duration.ofMillis(500))
         )
 
@@ -295,7 +305,18 @@ class MafiaGame(
 
     override fun openVotingMenu(player: Player) {
         val alivePlayers = players.filter { !killedPlayers.contains(it) }
-        val inventory = VotingMenu(player, alivePlayers, app).inventory
+
+        val inventorySize = (alivePlayers.size + 1).toInventorySize()
+
+        val inventory = Bukkit.createInventory(null, inventorySize, "Голосование")
+
+        alivePlayers.forEach {
+            val item = NamedItemStack(Material.PLAYER_HEAD, it.name)
+            inventory.addItem(item)
+        }
+
+        val barrier = NamedItemStack(Material.BARRIER, "Пропустить")
+        inventory.addItem(barrier)
 
         player.openInventory(inventory)
     }

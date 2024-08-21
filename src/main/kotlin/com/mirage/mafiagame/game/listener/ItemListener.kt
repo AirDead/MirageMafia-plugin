@@ -2,7 +2,6 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.nms.item.canBeTraded
-import dev.nikdekur.minelib.v1_12_R1.ext.sendPackets
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -46,7 +45,6 @@ class ItemListener : Listener {
         player.sendActionBar(successMessage.asText(NamedTextColor.GREEN))
 
         if (!isStealing) target.sendActionBar("Вам передали предмет...".asText(NamedTextColor.GREEN))
-        player.sendPackets()
     }
 
     private fun itemCanBeTraded(player: Player, item: ItemStack, isStealing: Boolean): Boolean {
