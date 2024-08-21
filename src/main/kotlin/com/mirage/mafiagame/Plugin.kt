@@ -32,8 +32,8 @@ class Plugin : ServerPlugin() {
 
             // Listener
             BlockListener(this),
-            ChatListener(),
-            InteractionListener(),
+            ChatListener(this),
+            InteractionListener(this),
             ItemListener(),
             PlayerListener(this)
         )

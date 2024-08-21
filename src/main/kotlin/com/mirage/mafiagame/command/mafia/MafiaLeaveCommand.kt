@@ -8,7 +8,7 @@ import dev.nikdekur.minelib.command.api.CommandTabContext
 import dev.nikdekur.minelib.ext.sendLangMsg
 import dev.nikdekur.minelib.i18n.msg.MSGHolder
 import dev.nikdekur.minelib.plugin.ServerPlugin
-import org.koin.core.component.inject
+import dev.nikdekur.ndkore.service.inject
 import kotlin.getValue
 
 class MafiaLeaveCommand(override val app: ServerPlugin): ServiceServerCommand() {

@@ -2,6 +2,7 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.nms.item.canBeTraded
+import dev.nikdekur.minelib.v1_12_R1.ext.sendPackets
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -27,8 +28,8 @@ class ItemListener : Listener {
         if (event.hand != EquipmentSlot.HAND) return
 
         when {
-            target.isSneaking && !player.isSneaking -> handleItemInteraction(player, target, isStealing = true)
-            player.isSneaking && target.isSneaking -> handleItemInteraction(player, target, isStealing = false)
+            target.isSneaking && !player.isSneaking -> handleItemInteraction(player, target, true)
+            player.isSneaking && target.isSneaking -> handleItemInteraction(player, target, false)
         }
     }
 
@@ -45,6 +46,7 @@ class ItemListener : Listener {
         player.sendActionBar(successMessage.asText(NamedTextColor.GREEN))
 
         if (!isStealing) target.sendActionBar("Вам передали предмет...".asText(NamedTextColor.GREEN))
+        player.sendPackets()
     }
 
     private fun itemCanBeTraded(player: Player, item: ItemStack, isStealing: Boolean): Boolean {

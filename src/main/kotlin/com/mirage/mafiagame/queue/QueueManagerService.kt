@@ -5,8 +5,8 @@ package com.mirage.mafiagame.queue
 import com.mirage.mafiagame.config.queue.QueueConfig
 import com.mirage.mafiagame.game.impl.MafiaGame
 import com.mirage.mafiagame.models.impl.SingleQueue
-import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.ndkore.service.Service
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -15,8 +15,8 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import kotlin.reflect.KClass
 
-class QueueManagerService(override val app: ServerPlugin) : QueueService, PluginService {
-    override val bindClass: KClass<*> get() = QueueService::class
+class QueueManagerService(override val app: ServerPlugin) : QueueService {
+    override val bindClass: KClass<out Service<*>> get() = QueueService::class
 
     private val queueManagers = mutableMapOf<String, QueueManager>()
 

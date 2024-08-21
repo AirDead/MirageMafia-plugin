@@ -2,14 +2,14 @@ package com.mirage.mafiagame.game.listener
 
 import com.mirage.mafiagame.game.currentGame
 import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.minelib.service.PluginListener
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import java.util.*
 
-class BlockListener(val app: ServerPlugin) : Listener {
+class BlockListener(override val app: ServerPlugin) : PluginListener {
 
     private val validPickaxes = EnumSet.of(
         Material.IRON_PICKAXE, Material.NETHERITE_PICKAXE, Material.GOLDEN_PICKAXE,

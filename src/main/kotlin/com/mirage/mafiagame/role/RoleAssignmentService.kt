@@ -1,14 +1,14 @@
 package com.mirage.mafiagame.role
 
 import com.mirage.mafiagame.role.impl.Captain
-import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.ndkore.service.Service
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import kotlin.reflect.KClass
 
-class RoleAssignmentService(override val app: ServerPlugin) : PluginService, RoleService {
-    override val bindClass: KClass<*>
+class RoleAssignmentService(override val app: ServerPlugin) : RoleService {
+    override val bindClass: KClass<out Service<*>>
         get() = RoleService::class
 
     val availableRoles: MutableList<Role> = mutableListOf()

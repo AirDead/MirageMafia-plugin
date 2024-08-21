@@ -3,11 +3,12 @@ package com.mirage.mafiagame
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.nms.item.NamedItemStack
 import dev.nikdekur.minelib.gui.GUI
+import dev.nikdekur.minelib.plugin.ServerPlugin
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 
-class VotingMenu(player: Player, val players: List<Player>): GUI(player, 54) {
+class VotingMenu(player: Player, val players: List<Player>, override val app: ServerPlugin): GUI(player, 54) {
     override fun getTitle(): String = "Голосование"
 
     override fun beforeOpen() {
@@ -24,7 +25,6 @@ class VotingMenu(player: Player, val players: List<Player>): GUI(player, 54) {
     }
 
     override fun onClick(event: InventoryClickEvent) {
-        event.isCancelled = true
 
         val game = player.currentGame ?: return
         val clickedItem = event.currentItem ?: return

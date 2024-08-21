@@ -16,7 +16,9 @@ import com.mirage.mafiagame.nms.npc.Corpse
 import com.mirage.mafiagame.queue.generateRandomInventory
 import com.mirage.mafiagame.role.RoleAssignmentService
 import com.mirage.mafiagame.role.currentRole
-import dev.nikdekur.minelib.koin.MineLibKoinComponent
+import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.minelib.service.PluginComponent
+import dev.nikdekur.ndkore.service.inject
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -29,20 +31,18 @@ import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
-import org.koin.core.component.inject
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class MafiaGame(
-    override val plugin: JavaPlugin,
+    override val app: ServerPlugin,
     override val players: List<Player>
-) : Game, MineLibKoinComponent {
+) : Game, PluginComponent {
     private val locationConfig by inject<LocationService>()
     private val roleAssignService by inject<RoleAssignmentService>()
 
@@ -74,8 +74,8 @@ class MafiaGame(
             bossBar.let { player.showBossBar(it) }
             Bukkit.getOnlinePlayers().forEach {
                 if (it !in players) {
-                    player.hidePlayer(plugin, it)
-                    it.hidePlayer(plugin, player)
+                    player.hidePlayer(app, it)
+                    it.hidePlayer(app, player)
                 }
             }
         }
@@ -99,11 +99,11 @@ class MafiaGame(
         players.forEach {
             Bukkit.getOnlinePlayers().forEach { player ->
                 if (it.currentGame == player.currentGame || it.currentGame == null) {
-                    player.showPlayer(plugin, it)
-                    it.showPlayer(plugin, player)
+                    player.showPlayer(app, it)
+                    it.showPlayer(app, player)
                 } else {
-                    player.hidePlayer(plugin, it)
-                    it.hidePlayer(plugin, player)
+                    player.hidePlayer(app, it)
+                    it.hidePlayer(app, player)
                 }   
             }
             it.currentGame = null
@@ -142,7 +142,7 @@ class MafiaGame(
                     )
                 )
             )
-            Corpse.spawnCorpse(it, "gohik", UUID.randomUUID(), location.x, location.y, location.z)
+            Corpse.spawnCorpse(it, "gosha", UUID.randomUUID(), location.x, location.y, location.z)
         }
 
         killedPlayers.add(player)
@@ -195,7 +195,7 @@ class MafiaGame(
 
         sabotageRunnable = object : BukkitRunnable() {
             override fun run() = onSabotageEnd(false)
-        }.runTaskLater(plugin, 6000)
+        }.runTaskLater(app, 6000)
     }
 
     override fun onSabotageEnd(isRepaired: Boolean) {
@@ -295,7 +295,7 @@ class MafiaGame(
 
     override fun openVotingMenu(player: Player) {
         val alivePlayers = players.filter { !killedPlayers.contains(it) }
-        val inventory = VotingMenu(player, alivePlayers).inventory
+        val inventory = VotingMenu(player, alivePlayers, app).inventory
 
         player.openInventory(inventory)
     }
@@ -303,7 +303,7 @@ class MafiaGame(
 
     override fun startDayNightCycle() {
         dayCount += 1
-        timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+        timeRunnable = Bukkit.getScheduler().runTaskLater(app, Runnable {
             startNight()
         }, 12000)
     }
@@ -323,7 +323,7 @@ class MafiaGame(
             player.addPotionEffect(PotionEffect(PotionEffectType.BLINDNESS, 4800, 4, true, false))
         }
 
-        timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+        timeRunnable = Bukkit.getScheduler().runTaskLater(app, Runnable {
             endNight()
         }, 4800)
     }
@@ -356,7 +356,7 @@ class MafiaGame(
             return
         }
 
-        timeRunnable = Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+        timeRunnable = Bukkit.getScheduler().runTaskLater(app, Runnable {
             startNight()
         }, 12000)
     }
@@ -368,7 +368,7 @@ class MafiaGame(
         player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 4800, 3, true, false))
         player.sleep(location, true)
 
-        plugin.server.scheduler.runTaskLater(plugin, Runnable {
+        app.server.scheduler.runTaskLater(app, Runnable {
             if (sleepingPlayers.size > alive / 2) {
                 endNight()
             }

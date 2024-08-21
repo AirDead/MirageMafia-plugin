@@ -1,10 +1,11 @@
 package com.mirage.mafiagame.network.listener
 
-import dev.nikdekur.minelib.koin.MineLibKoinComponent
+import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.minelib.service.PluginComponent
 import org.bukkit.entity.Player
 import org.bukkit.plugin.messaging.PluginMessageListener
 
-class QueueJoinListener : PluginMessageListener, MineLibKoinComponent {
+class QueueJoinListener(override val app: ServerPlugin) : PluginMessageListener, PluginComponent {
 
 //    fun registerChannels() {
 //        Bukkit.getMessenger().registerIncomingPluginChannel(app, "mafia:queue", this)

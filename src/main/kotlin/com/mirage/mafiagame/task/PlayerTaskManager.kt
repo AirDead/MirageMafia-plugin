@@ -2,16 +2,15 @@ package com.mirage.mafiagame.task
 
 import com.mirage.mafiagame.role.currentRole
 import com.mirage.mafiagame.task.type.InventoryTask
-import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.ndkore.service.Service
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import kotlin.reflect.KClass
 
-class PlayerTaskManager(override val app: ServerPlugin) : PluginService, TaskService, Listener {
-    override val bindClass: KClass<*>
+class PlayerTaskManager(override val app: ServerPlugin) : TaskService {
+    override val bindClass: KClass<out Service<*>>
         get() = TaskService::class
     val playerActiveTasks = hashMapOf<Player, Task>()
 

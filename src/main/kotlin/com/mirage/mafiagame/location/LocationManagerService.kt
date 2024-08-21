@@ -2,16 +2,16 @@ package com.mirage.mafiagame.location
 
 import com.mirage.mafiagame.config.location.LocationConfig
 import com.mirage.mafiagame.config.location.LocationType
-import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.ndkore.service.Service
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import kotlin.reflect.KClass
 
-class LocationManagerService(override val app: ServerPlugin) : LocationService, PluginService {
-    override val bindClass: KClass<*> get() = LocationService::class
-
+class LocationManagerService(override val app: ServerPlugin) : LocationService {
+    override val bindClass: KClass<out Service<*>>
+        get() = LocationService::class
     private val locations = hashMapOf<LocationType, Location>()
 
     override fun onLoad() {

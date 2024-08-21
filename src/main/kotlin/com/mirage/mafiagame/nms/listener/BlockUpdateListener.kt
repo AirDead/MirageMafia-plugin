@@ -9,8 +9,8 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBl
 import com.mirage.mafiagame.ext.sendPackets
 import com.mirage.mafiagame.game.currentGame
 import com.mirage.mafiagame.nms.block.toBlockPos
-import dev.nikdekur.minelib.PluginService
 import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.minelib.service.PluginService
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
 import net.minecraft.world.level.block.Blocks
 import org.bukkit.Bukkit

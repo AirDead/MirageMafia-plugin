@@ -1,16 +1,16 @@
 package com.mirage.mafiagame.game.listener
 
-
 import com.mirage.mafiagame.ext.asText
 import com.mirage.mafiagame.game.Game
 import com.mirage.mafiagame.game.currentGame
+import dev.nikdekur.minelib.plugin.ServerPlugin
+import dev.nikdekur.minelib.service.PluginListener
 import org.bukkit.Material
 import org.bukkit.event.EventHandler
-import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 
-class InteractionListener : Listener {
+class InteractionListener(override val app: ServerPlugin) : PluginListener {
 
     @EventHandler
     fun onPlayerInteract(event: PlayerInteractEvent) {
@@ -52,8 +52,8 @@ class InteractionListener : Listener {
         val maxDistance = 3.0
         // TODO: Implement this
         when {
-//            storage.meetingStartLocation.distance(player.location) <= maxDistance -> game.startVoting(player)
-//            storage.meetingEndLocation.distance(player.location) <= maxDistance -> game.endVoting()
+            // storage.meetingStartLocation.distance(player.location) <= maxDistance -> game.startVoting(player)
+            // storage.meetingEndLocation.distance(player.location) <= maxDistance -> game.endVoting()
         }
     }
 }
