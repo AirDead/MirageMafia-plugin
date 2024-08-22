@@ -12,6 +12,10 @@ commands:
     description: Sudo command
     usage: /<command> <player> <command>
     aliases: [su, s]
+  test:
+    description: Test command
+    usage: /<command>
+    aliases: [t]
 
 depend:
   - packetevents

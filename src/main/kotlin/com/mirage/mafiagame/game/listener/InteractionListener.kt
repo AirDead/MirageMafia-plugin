@@ -58,8 +58,10 @@ class InteractionListener(override val app: ServerPlugin) : PluginListener {
                     player.sendActionBar("Заперто...".asText(200, 43, 43))
                 }
             }
-            Material.RED_BED ->
+            Material.RED_BED -> {
                 game.onPlayerClickBed(player, block.location)
+                println("Player clicked bed")
+            }
 
             Material.STONE_BUTTON ->
                 handleButtonInteraction(player, game)

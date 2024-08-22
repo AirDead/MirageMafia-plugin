@@ -38,6 +38,7 @@ import org.bukkit.scheduler.BukkitTask
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.ceil
 
 class MafiaGame(
     override val app: ServerPlugin,
@@ -57,8 +58,8 @@ class MafiaGame(
     override var timeRunnable: BukkitTask? = null
     override var sleepingPlayers = mutableSetOf<UUID>()
     override var isNight = false
-    override var dayCount = 0
-    override val bossBar = BossBar.bossBar("День".asText(), 1.0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
+    override var dayCount = 1
+    override val bossBar = BossBar.bossBar("День | $dayCount".asText(), 1.0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS)
     override var isVoting = false
     override val votingMap = mutableMapOf<String, Int>()
     override val skipVoters = mutableSetOf<UUID>()
@@ -108,7 +109,7 @@ class MafiaGame(
             }
             it.currentGame = null
             it.currentRole = null
-            it.teleport(Location(Bukkit.getWorld("world"), 157.0, 286.0, 127.0))
+            it.teleport(locationConfig.getLocation(LocationType.SPAWN) ?: error("Spawn location not found"))
             it.playSound(it.location, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f)
             it.showTitle(title)
             it.hideBossBar(bossBar)
@@ -321,9 +322,7 @@ class MafiaGame(
         player.openInventory(inventory)
     }
 
-
     override fun startDayNightCycle() {
-        dayCount += 1
         timeRunnable = Bukkit.getScheduler().runTaskLater(app, Runnable {
             startNight()
         }, 12000)
@@ -335,7 +334,7 @@ class MafiaGame(
             "Ночь наступила!".asText(NamedTextColor.BLUE),
             "Иконка ночи".asText()
         )
-        bossBar.name(Component.text("$locationConfig.bossBarNameNight | $dayCount "))
+        bossBar.name(Component.text("Ночь | $dayCount "))
         bossBar.color(BossBar.Color.RED)
 
         players.forEach { player ->
@@ -345,20 +344,20 @@ class MafiaGame(
         }
 
         timeRunnable = Bukkit.getScheduler().runTaskLater(app, Runnable {
-            endNight()
+             endNight()
         }, 4800)
     }
 
     override fun endNight() {
         sleepingPlayers.clear()
         isNight = false
-        fillChestInventories(chestInventories.keys.toList())
+        // fillChestInventories(chestInventories.keys.toList())
         val title = Title.title(
             "День наступил!".asText(NamedTextColor.YELLOW),
             "Иконка солнца".asText(NamedTextColor.GREEN)
         )
 
-        bossBar.name("Иконка солнца".asText())
+        bossBar.name("День | $dayCount ".asText())
         bossBar.color(BossBar.Color.GREEN)
 
         players.forEach { player ->
@@ -372,7 +371,7 @@ class MafiaGame(
 
         dayCount += 1
 
-        if (dayCount == 5) {
+        if (dayCount == 6) {
             end(false)
             return
         }
@@ -385,16 +384,16 @@ class MafiaGame(
     override fun onPlayerClickBed(player: Player, location: Location) {
         if (!isNight) return
         val alive = players.size - killedPlayers.size
-        skipVoters.add(player.uniqueId)
+        println(alive)
+        sleepingPlayers.add(player.uniqueId)
         player.addPotionEffect(PotionEffect(PotionEffectType.SLOW, 4800, 3, true, false))
         player.sleep(location, true)
-
-        app.server.scheduler.runTaskLater(app, Runnable {
-            if (sleepingPlayers.size > alive / 2) {
-                endNight()
-            }
-        }, 10)
+        println(ceil(alive / 2.0))
+        if (sleepingPlayers.size >= alive / 2) {
+            endNight()
+        }
     }
+
 
     override fun checkGameEnd() {
         val alivePlayers = players.filter { !killedPlayers.contains(it) }

@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class QueueConfig(
-    val queues: List<QueueSettings> = listOf(QueueSettings("test", 1), QueueSettings("test2", 2))
+    val queues: List<QueueSettings> = emptyList()
 )
 
 @Serializable

@@ -1,8 +1,10 @@
 package com.mirage.mafiagame
 
 import com.github.retrooper.packetevents.PacketEvents
+import com.mirage.mafiagame.chests.ConfigChestService
 import com.mirage.mafiagame.command.MafiaCommand
 import com.mirage.mafiagame.command.SudoCommand
+import com.mirage.mafiagame.command.TestCommand
 import com.mirage.mafiagame.game.listener.BlockListener
 import com.mirage.mafiagame.game.listener.ChatListener
 import com.mirage.mafiagame.game.listener.InteractionListener
@@ -25,10 +27,12 @@ class Plugin : ServerPlugin() {
             RoleAssignmentService(this),
             PlayerTaskManager(this),
             BlockUpdateListener(this),
+            ConfigChestService(this),
 
             // Commands
             SudoCommand(this),
             MafiaCommand(this),
+            TestCommand(this),
 
             // Listener
             BlockListener(this),
